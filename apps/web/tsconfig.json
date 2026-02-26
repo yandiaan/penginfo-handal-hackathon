@@ -14,6 +14,7 @@
   ],
   "compilerOptions": {
     "target": "ES2022",
+    "moduleResolution": "bundler",
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,

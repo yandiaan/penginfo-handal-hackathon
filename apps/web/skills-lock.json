@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "astro-framework": {
+      "source": "delineas/astro-framework-agents",
+      "sourceType": "github",
+      "computedHash": "009dd46bb418abc15db4402ef94b71dc65be01d90ca0193ab94763a60e07096a"
+    }
+  }
+}
