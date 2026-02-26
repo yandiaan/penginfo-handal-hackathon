@@ -1,5 +1,8 @@
 ---
+name: OPSX: Continue
 description: Continue working on a change - create the next artifact (Experimental)
+category: Workflow
+tags: [workflow, artifacts, experimental]
 ---
 
 Continue working on a change by creating the next artifact.
