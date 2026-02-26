@@ -1,19 +1,32 @@
 {
-  "name": "astro-app",
-  "type": "module",
+  "name": "repo",
+  "private": true,
   "version": "0.0.1",
   "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro"
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "lint:fix": "turbo run lint:fix",
+    "preview": "turbo run preview"
   },
-  "dependencies": {
-    "@astrojs/mdx": "^4.3.13",
-    "@tailwindcss/vite": "^4.1.18",
-    "@types/canvas-confetti": "^1.9.0",
-    "astro": "^5.17.1",
-    "canvas-confetti": "^1.9.4",
-    "tailwindcss": "^4.1.18"
+  "devDependencies": {
+    "@types/node": "^25.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "eslint": "^10.0.2",
+    "eslint-plugin-astro": "^1.6.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "globals": "^17.3.0",
+    "prettier": "^3.8.1",
+    "turbo": "latest"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@10.0.0",
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "sharp"]
   }
 }
