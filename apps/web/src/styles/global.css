@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+
+.react-flow__attribution {
+    display: none !important;
+}
