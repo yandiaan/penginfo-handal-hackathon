@@ -40,15 +40,15 @@ export function FlowCanvasInner() {
     : null;
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative' }}>
+    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        nodeTypes={nodeTypes}
+        nodeTypes={nodeTypes as any}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
-        onNodeClick={handleNodeClick}
+        onNodeClick={handleNodeClick as any}
         onPaneClick={handlePaneClick}
         fitView
         panOnDrag={mode === 'pan'}
@@ -57,7 +57,7 @@ export function FlowCanvasInner() {
         panOnScroll={mode === 'select'}
       >
         <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
-        <Controls />
+        <Controls style={{ color: 'black' }} />
         <MiniMap nodeStrokeWidth={3} zoomable pannable />
         <FlowToolbar mode={mode} onModeChange={setMode} onAddNode={addNode} />
       </ReactFlow>
