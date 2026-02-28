@@ -24,7 +24,7 @@ export { ExportNode } from './output/ExportNode';
 export { CompactNode } from './CompactNode';
 
 // Node types registry for ReactFlow
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export const nodeTypes: Record<CustomNodeType, ComponentType<NodeProps<any>>> = {
   trendSeed: TrendSeedNode,
   textInput: TextInputNode,

@@ -10,7 +10,7 @@ export default defineConfig([
   // Astro recommended rules
   ...astroPlugin.configs.recommended,
 
-  globalIgnores(['dist/**', '.astro/**', 'node_modules/**']),
+  globalIgnores(['dist/**', '.astro/**', 'node_modules/**', '.vercel/**']),
 
   // TypeScript & JS files
   {

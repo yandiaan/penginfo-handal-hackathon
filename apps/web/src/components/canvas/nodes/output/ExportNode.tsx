@@ -30,9 +30,7 @@ export function ExportNode({ data, selected }: NodeProps<ExportData>) {
           <span>Link ready</span>
         </div>
       ) : (
-        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>
-          Ready to export
-        </div>
+        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>Ready to export</div>
       )}
     </CompactNode>
   );

@@ -1,10 +1,6 @@
 import { useState } from 'react';
 import { Panel } from '@xyflow/react';
-import {
-  NODE_CATEGORIES,
-  NODE_TYPES_BY_CATEGORY,
-  type NodeCategoryConfig,
-} from './config/nodeCategories';
+import { NODE_CATEGORIES, NODE_TYPES_BY_CATEGORY } from './config/nodeCategories';
 import type { CustomNodeType } from './types/node-types';
 import { btnStyle, dividerStyle, labelStyle, toolbarStyle } from './styles/toolbar';
 import type { MouseMode } from './types';
@@ -133,9 +129,7 @@ export function FlowToolbar({ mode, onModeChange, onAddNode }: Props) {
                     >
                       <span style={{ fontSize: '16px' }}>{node.icon}</span>
                       <div>
-                        <div style={{ fontWeight: 500, color: category.color }}>
-                          {node.label}
-                        </div>
+                        <div style={{ fontWeight: 500, color: category.color }}>{node.label}</div>
                         <div
                           style={{
                             fontSize: '11px',

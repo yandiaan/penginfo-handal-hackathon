@@ -70,11 +70,7 @@ export const mockAI = {
   /**
    * Generate variant batches
    */
-  generateVariants: async <T>(
-    input: T,
-    count: number,
-    randomize: boolean,
-  ): Promise<T[]> => {
+  generateVariants: async <T>(input: T, count: number, randomize: boolean): Promise<T[]> => {
     await delay(300 + Math.random() * 200);
 
     const variants = Array.from({ length: count }, () => ({
@@ -92,7 +88,7 @@ export const mockAI = {
   /**
    * Simulate image generation (returns placeholder)
    */
-  generateImage: async (prompt: string): Promise<string> => {
+  generateImage: async (_prompt: string): Promise<string> => {
     await delay(1500 + Math.random() * 500);
 
     // Return a placeholder image URL

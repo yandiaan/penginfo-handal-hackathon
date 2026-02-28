@@ -1,13 +1,7 @@
 import type { Node } from '@xyflow/react';
 
 // Node categories
-export type NodeCategory =
-  | 'input'
-  | 'generator'
-  | 'modifier'
-  | 'character'
-  | 'variant'
-  | 'output';
+export type NodeCategory = 'input' | 'generator' | 'modifier' | 'character' | 'variant' | 'output';
 
 // All custom node type identifiers
 export type CustomNodeType =
@@ -85,7 +79,12 @@ export interface VariantBatchData extends BaseNodeData {
 
 // CanvasRender Node
 export type LayoutType = 'top-bottom' | 'side-by-side' | 'overlay';
-export type DimensionPreset = 'instagram-square' | 'instagram-story' | 'tiktok' | 'twitter' | 'custom';
+export type DimensionPreset =
+  | 'instagram-square'
+  | 'instagram-story'
+  | 'tiktok'
+  | 'twitter'
+  | 'custom';
 
 export interface CanvasRenderConfig {
   layout: LayoutType;

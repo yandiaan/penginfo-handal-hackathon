@@ -1,7 +1,7 @@
 import { Handle, Position } from '@xyflow/react';
 import type { ReactNode, CSSProperties } from 'react';
 import { getCategoryForNodeType } from '../config/nodeCategories';
-import type { BaseNodeData, CustomNodeType } from '../types/node-types';
+import type { CustomNodeType } from '../types/node-types';
 
 export interface CompactNodeProps {
   nodeType: CustomNodeType;
