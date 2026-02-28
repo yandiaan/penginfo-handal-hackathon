@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   Background,
   BackgroundVariant,
@@ -14,6 +14,7 @@ import { useFlowNodes } from './hooks/useFlowNodes';
 import { useMouseMode } from './hooks/useMouseMode';
 import { useTemplateLoader } from './hooks/useTemplateLoader';
 import { useExecutionStore } from './execution/store';
+import { ExecutionContext } from './execution/ExecutionContext';
 import { runPipeline } from './execution/runner';
 import { FlowToolbar } from './FlowToolbar';
 import { nodeTypes } from './nodes';
@@ -51,40 +52,47 @@ export function FlowCanvasInner() {
     ? nodes.find((n) => n.id === selectedNode.id) || null
     : null;
 
-  return (
-    <div className="w-full h-full relative">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes as any}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeClick={handleNodeClick as any}
-        onPaneClick={handlePaneClick}
-        fitView
-        panOnDrag={mode === 'pan'}
-        selectionOnDrag={mode === 'select'}
-        selectionMode={SelectionMode.Partial}
-        panOnScroll={mode === 'select'}
-      >
-        <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
-        <Controls className="text-black" />
-        <MiniMap nodeStrokeWidth={3} zoomable pannable />
-        <FlowToolbar
-          mode={mode}
-          onModeChange={setMode}
-          onAddNode={addNode}
-          onRunPipeline={handleRunPipeline}
-          pipelineRunning={executionStore.pipelineRunning}
-        />
-      </ReactFlow>
+  const executionContextValue = useMemo(
+    () => ({ getNodeState: executionStore.getNodeState }),
+    [executionStore.getNodeState],
+  );
 
-      {/* Node Detail Drawer */}
-      <NodeDetailDrawer
-        selectedNode={currentSelectedNode as Node<CustomNodeData> | null}
-        onClose={handleCloseDrawer}
-      />
-    </div>
+  return (
+    <ExecutionContext.Provider value={executionContextValue}>
+      <div className="w-full h-full relative">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes as any}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onNodeClick={handleNodeClick as any}
+          onPaneClick={handlePaneClick}
+          fitView
+          panOnDrag={mode === 'pan'}
+          selectionOnDrag={mode === 'select'}
+          selectionMode={SelectionMode.Partial}
+          panOnScroll={mode === 'select'}
+        >
+          <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
+          <Controls className="text-black" />
+          <MiniMap nodeStrokeWidth={3} zoomable pannable />
+          <FlowToolbar
+            mode={mode}
+            onModeChange={setMode}
+            onAddNode={addNode}
+            onRunPipeline={handleRunPipeline}
+            pipelineRunning={executionStore.pipelineRunning}
+          />
+        </ReactFlow>
+
+        {/* Node Detail Drawer */}
+        <NodeDetailDrawer
+          selectedNode={currentSelectedNode as Node<CustomNodeData> | null}
+          onClose={handleCloseDrawer}
+        />
+      </div>
+    </ExecutionContext.Provider>
   );
 }

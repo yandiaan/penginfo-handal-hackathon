@@ -1,6 +1,6 @@
 import { Router, type Router as RouterType } from 'express';
 import { z } from 'zod';
-import { generateText, generateImage, generateVideo, pollTask } from '@/services/dashscope';
+import { generateText, generateImage, generateVideo, pollTask } from '@/services/ai-service';
 
 const router: RouterType = Router();
 
@@ -59,6 +59,7 @@ router.post('/prompt-enhancer/run', async (req, res, next) => {
       duration_ms: Date.now() - startTime,
     });
   } catch (err) {
+    console.log(err);
     next(err);
   }
 });
@@ -139,6 +140,7 @@ router.post('/image-generator/run', async (req, res, next) => {
       return;
     }
 
+    // DashScope returns a task ID — poll until completion
     const taskId = await generateImage({
       prompt: promptData.prompt,
       negative_prompt: promptData.negativePrompt,

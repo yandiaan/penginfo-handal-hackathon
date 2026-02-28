@@ -5,11 +5,64 @@ import { RUNNABLE_NODE_TYPES } from '../types/node-types';
 import { topologySort } from './topology';
 import { collectNodeInputs } from './inputCollector';
 import type { PipelineRunResult, NodeRunResponse } from './types';
+import type { NodeOutput } from '../types/port-types';
 
-const API_BASE = '/api/node';
+const API_BASE = 'http://localhost:3000/api/node';
+
+/**
+ * Convert a non-runnable node's data into a NodeOutput.
+ * Input nodes produce outputs from their own config rather than upstream data.
+ */
+function nodeDataToOutput(
+  nodeType: CustomNodeType,
+  nodeData: Record<string, unknown>,
+): NodeOutput | null {
+  const config = nodeData.config as Record<string, unknown> | undefined;
+  if (!config) return null;
+  const timestamp = Date.now();
+
+  switch (nodeType) {
+    case 'textPrompt':
+      return {
+        type: 'text',
+        data: { text: (config.text as string) || '' },
+        timestamp,
+      };
+    case 'imageUpload': {
+      const url = config.previewUrl as string | null;
+      if (!url) return null;
+      return {
+        type: 'image',
+        data: { url, width: 0, height: 0 },
+        timestamp,
+      };
+    }
+    case 'styleConfig':
+      return {
+        type: 'style',
+        data: {
+          artStyle: config.artStyle as string,
+          colorPalette: (config.colorPalette as string[]) || [],
+          mood: config.mood as string,
+          culturalTheme: (config.culturalTheme as string) || null,
+        },
+        timestamp,
+      };
+    case 'templatePreset':
+      return {
+        type: 'text',
+        data: { text: `template:${config.template}:${config.locale}` },
+        timestamp,
+      };
+    default:
+      return null;
+  }
+}
 
 /**
  * Execute the full pipeline in topological order.
+ * Uses a local outputMap to pass results between nodes within a single run,
+ * avoiding stale React state closures.
  */
 export async function runPipeline(
   nodes: Node[],
@@ -19,6 +72,9 @@ export async function runPipeline(
   const runId = `run-${Date.now()}`;
   const startTime = Date.now();
   store.setPipelineRunning(true, runId);
+
+  // Local map to track outputs during this run (avoids stale React state reads)
+  const outputMap = new Map<string, NodeOutput>();
 
   try {
     const order = topologySort(nodes, edges);
@@ -34,7 +90,7 @@ export async function runPipeline(
         store.setNodeState(nodeId, { status: 'running', progress: 0, error: null });
 
         try {
-          const inputs = collectNodeInputs(nodeId, edges, store);
+          const inputs = collectNodeInputs(nodeId, edges, outputMap);
           const response = await executeNodeOnServer(nodeType, node.data, inputs);
           store.setNodeState(nodeId, {
             status: 'done',
@@ -42,6 +98,7 @@ export async function runPipeline(
             progress: 100,
             lastRunAt: Date.now(),
           });
+          outputMap.set(nodeId, response.output);
         } catch (err) {
           store.setNodeState(nodeId, {
             status: 'error',
@@ -52,15 +109,21 @@ export async function runPipeline(
           break;
         }
       } else {
-        // Client-side node — pass through or compute locally
-        const inputs = collectNodeInputs(nodeId, edges, store);
+        // Non-runnable node — produce output from own data or pass through upstream
+        const inputs = collectNodeInputs(nodeId, edges, outputMap);
+        const ownOutput = nodeDataToOutput(nodeType, node.data as Record<string, unknown>);
         const firstInput = Object.values(inputs)[0] ?? null;
+        const output = ownOutput ?? firstInput;
+
         store.setNodeState(nodeId, {
           status: 'done',
-          output: firstInput,
+          output,
           progress: 100,
           lastRunAt: Date.now(),
         });
+        if (output) {
+          outputMap.set(nodeId, output);
+        }
       }
     }
 
@@ -103,7 +166,14 @@ export async function runNode(
   store.setNodeState(nodeId, { status: 'running', progress: 0, error: null });
 
   try {
-    const inputs = collectNodeInputs(nodeId, edges, store);
+    // Build outputMap from current store state for single-node runs
+    const outputMap = new Map<string, NodeOutput>();
+    for (const n of nodes) {
+      const output = store.getNodeOutput(n.id);
+      if (output) outputMap.set(n.id, output);
+    }
+
+    const inputs = collectNodeInputs(nodeId, edges, outputMap);
     const response = await executeNodeOnServer(nodeType, node.data, inputs);
     store.setNodeState(nodeId, {
       status: 'done',

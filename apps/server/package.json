@@ -2,7 +2,7 @@
   "name": "@repo/server",
   "version": "0.0.1",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
+    "dev": "cross-env NODE_TLS_REJECT_UNAUTHORIZED=0 ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
     "build": "tsc && tsc-alias",
     "start": "node dist/index.js",
     "lint": "eslint .",
@@ -25,6 +25,7 @@
     "@types/express": "^5.0.0",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.3.1",
+    "cross-env": "^10.1.0",
     "ts-node-dev": "^2.0.0",
     "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
