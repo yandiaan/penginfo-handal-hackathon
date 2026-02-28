@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
-const { content } = Astro.props;
+const { title, content } = Astro.props;
+const pageTitle = title || content?.title || 'Workflow Builder';
 ---
 
 <html lang="en">
@@ -9,7 +10,7 @@ const { content } = Astro.props;
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
-		<title>{content.title}</title>
+		<title>{pageTitle}</title>
 	</head>
 	<body>
 		<slot />
