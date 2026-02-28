@@ -1,7 +1,6 @@
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import type { ReactNode } from 'react';
 import { getCategoryForNodeType, type NodeCategoryConfig } from '../config/nodeCategories';
-import { createNodeStyles } from '../styles/nodes';
 import type { BaseNodeData, CustomNodeType } from '../types/node-types';
 
 export interface BaseNodeProps<T extends BaseNodeData> {
@@ -27,39 +26,50 @@ export function BaseNode<T extends BaseNodeData>({
 }: BaseNodeProps<T>) {
   const { updateNodeData } = useReactFlow();
   const category = getCategoryForNodeType(nodeType);
-  const styles = createNodeStyles(category);
 
   const toggleExpanded = () => {
     updateNodeData(id, { isExpanded: !data.isExpanded });
   };
 
   return (
-    <div style={styles.container}>
+    <div
+      className="min-w-[280px] max-w-[320px] bg-[#1e1e2e] rounded-xl overflow-hidden font-[Inter,system-ui,sans-serif]"
+      style={{
+        border: `2px solid ${category.borderColor}`,
+        boxShadow: `0 4px 20px rgba(0, 0, 0, 0.3), 0 0 20px ${category.bgColor}`,
+      }}
+    >
       {/* Input handles */}
       {inputs > 0 && (
         <Handle
           type="target"
           position={Position.Left}
-          style={{
-            width: '12px',
-            height: '12px',
-            backgroundColor: '#1e1e2e',
-            border: `2px solid ${category.color}`,
-          }}
+          className="!w-3 !h-3 !bg-[#1e1e2e]"
+          style={{ border: `2px solid ${category.color}` }}
         />
       )}
 
       {/* Header */}
-      <div style={styles.header} onClick={toggleExpanded}>
-        <div style={styles.headerLeft}>
-          <span style={styles.headerIcon}>{icon}</span>
-          <span style={styles.headerTitle}>{title}</span>
+      <div
+        className="flex items-center justify-between px-4 py-3 cursor-pointer select-none"
+        style={{
+          backgroundColor: category.bgColor,
+          borderBottom: `1px solid ${category.borderColor}`,
+        }}
+        onClick={toggleExpanded}
+      >
+        <div className="flex items-center gap-2">
+          <span className="text-lg">{icon}</span>
+          <span
+            className="text-sm font-semibold tracking-[0.3px]"
+            style={{ color: category.color }}
+          >
+            {title}
+          </span>
         </div>
         <span
-          style={{
-            ...styles.expandIcon,
-            transform: data.isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-          }}
+          className="text-white/50 text-xs transition-transform duration-200"
+          style={{ transform: data.isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
         >
           ▼
         </span>
@@ -67,9 +77,9 @@ export function BaseNode<T extends BaseNodeData>({
 
       {/* Content */}
       {data.isExpanded ? (
-        <div style={styles.content}>{children}</div>
+        <div className="p-4 flex flex-col gap-3">{children}</div>
       ) : (
-        <div style={styles.collapsedContent}>Click to expand configuration</div>
+        <div className="py-2 px-4 text-white/40 text-xs italic">Click to expand configuration</div>
       )}
 
       {/* Output handles */}
@@ -77,12 +87,8 @@ export function BaseNode<T extends BaseNodeData>({
         <Handle
           type="source"
           position={Position.Right}
-          style={{
-            width: '12px',
-            height: '12px',
-            backgroundColor: '#1e1e2e',
-            border: `2px solid ${category.color}`,
-          }}
+          className="!w-3 !h-3 !bg-[#1e1e2e]"
+          style={{ border: `2px solid ${category.color}` }}
         />
       )}
     </div>

@@ -1,5 +1,5 @@
 ---
-import FlowCanvas from '@/components/canvas';
+import { TemplateGallery } from '@/components/templates/TemplateGallery';
 import Topbar from '@/components/layout/Topbar';
 import LeftPanel from '@/components/layout/LeftPanel';
 import '@/styles/global.css';
@@ -10,18 +10,18 @@ import '@/styles/global.css';
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Templates – Workflow Builder</title>
+        <title>Templates – Content Generator</title>
     </head>
     <body
-        class="bg-[#030d0e] text-[#edfdfd] overflow-hidden text-sm h-[100dvh] w-screen font-sans flex flex-col"
+        class="bg-[#030d0e] text-[#edfdfd] overflow-auto text-sm min-h-[100dvh] w-screen font-sans flex flex-col"
     >
         <Topbar client:load />
         <div class="flex flex-1 overflow-hidden relative">
             <div class="h-full hidden lg:block">
                 <LeftPanel client:load />
             </div>
-            <main class="flex-1 relative h-full w-full">
-                <FlowCanvas client:only="react" />
+            <main class="flex-1 relative h-full w-full overflow-auto">
+                <TemplateGallery client:only="react" />
             </main>
         </div>
     </body>

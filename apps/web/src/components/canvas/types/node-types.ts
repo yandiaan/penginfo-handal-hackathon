@@ -1,111 +1,188 @@
 import type { Node } from '@xyflow/react';
+import type { NodePortSchema } from './port-types';
 
 // Node categories
-export type NodeCategory =
-  | 'input'
-  | 'generator'
-  | 'modifier'
-  | 'character'
-  | 'variant'
-  | 'output';
+export type NodeCategory = 'input' | 'transform' | 'generate' | 'compose' | 'output';
 
 // All custom node type identifiers
 export type CustomNodeType =
-  | 'trendSeed'
-  | 'textInput'
-  | 'aiTextGenerator'
-  | 'humorStyle'
-  | 'variantBatch'
-  | 'canvasRender'
+  | 'textPrompt'
+  | 'imageUpload'
+  | 'templatePreset'
+  | 'promptEnhancer'
+  | 'styleConfig'
+  | 'imageGenerator'
+  | 'videoGenerator'
+  | 'textOverlay'
+  | 'preview'
   | 'export';
 
 // Base node data interface
 export interface BaseNodeData extends Record<string, unknown> {
   label: string;
-  isExpanded: boolean;
 }
 
-// TrendSeed Node
-export interface TrendSeedConfig {
-  topic: string;
-  keywords: string[];
-  trending: boolean;
-}
+// --- INPUT NODES ---
 
-export interface TrendSeedData extends BaseNodeData {
-  config: TrendSeedConfig;
-}
-
-// TextInput Node
-export interface TextInputConfig {
+export interface TextPromptConfig {
   text: string;
   maxLength: number;
+  placeholder: string;
 }
 
-export interface TextInputData extends BaseNodeData {
-  config: TextInputConfig;
+export interface TextPromptData extends BaseNodeData {
+  config: TextPromptConfig;
 }
 
-// AITextGenerator Node
-export interface AITextGeneratorConfig {
-  prompt: string;
-  temperature: number;
-  maxTokens: number;
-  outputCount: number;
-  generatedOutputs: string[];
+export interface ImageUploadConfig {
+  previewUrl: string | null;
+  fileName: string | null;
+  fileSizeMB: number | null;
+  maxSizeMB: number;
 }
 
-export interface AITextGeneratorData extends BaseNodeData {
-  config: AITextGeneratorConfig;
+export interface ImageUploadData extends BaseNodeData {
+  config: ImageUploadConfig;
 }
 
-// HumorStyle Node
-export type HumorStyleType = 'receh' | 'satir' | 'relatable' | 'dark' | 'absurd';
+export type TemplateId = 'ramadan-wishes' | 'holiday-meme' | 'ai-pet' | 'custom-avatar' | 'blank';
 
-export interface HumorStyleConfig {
-  style: HumorStyleType;
-  intensity: number;
-  language: 'id' | 'en';
+export interface TemplatePresetConfig {
+  template: TemplateId;
+  locale: 'id' | 'en';
 }
 
-export interface HumorStyleData extends BaseNodeData {
-  config: HumorStyleConfig;
+export interface TemplatePresetData extends BaseNodeData {
+  config: TemplatePresetConfig;
 }
 
-// VariantBatch Node
-export interface VariantBatchConfig {
-  count: number;
-  randomize: boolean;
+// --- TRANSFORM NODES ---
+
+export type CreativityLevel = 'precise' | 'balanced' | 'creative';
+export type ContentType = 'wishes' | 'meme' | 'character' | 'avatar' | 'general';
+export type ToneType = 'formal' | 'casual' | 'funny' | 'heartfelt';
+
+export interface PromptEnhancerConfig {
+  creativity: CreativityLevel;
+  contentType: ContentType;
+  tone: ToneType;
+  language: 'id' | 'en' | 'mixed';
+}
+
+export interface PromptEnhancerData extends BaseNodeData {
+  config: PromptEnhancerConfig;
+}
+
+export type ArtStyle =
+  | 'realistic'
+  | 'cartoon'
+  | 'anime'
+  | 'watercolor'
+  | 'pixel-art'
+  | 'islamic-art'
+  | 'pop-art'
+  | 'minimalist';
+
+export type MoodType = 'warm' | 'cool' | 'playful' | 'elegant' | 'spiritual' | 'funny' | 'cute';
+
+export type CulturalTheme = 'ramadan' | 'lebaran' | 'natal' | 'imlek' | 'general' | null;
+
+export interface StyleConfigConfig {
+  artStyle: ArtStyle;
+  colorPalette: string[];
+  mood: MoodType;
+  culturalTheme: CulturalTheme;
+}
+
+export interface StyleConfigData extends BaseNodeData {
+  config: StyleConfigConfig;
+}
+
+// --- GENERATE NODES ---
+
+export type ImageGenMode = 'text2img' | 'img2img';
+export type ImageDimension =
+  | 'square-1024'
+  | 'portrait-768x1024'
+  | 'landscape-1024x768'
+  | 'story-576x1024';
+
+export interface ImageGeneratorConfig {
+  mode: ImageGenMode;
+  dimensions: ImageDimension;
+  steps: number;
   seed: number | null;
 }
 
-export interface VariantBatchData extends BaseNodeData {
-  config: VariantBatchConfig;
+export interface ImageGeneratorData extends BaseNodeData {
+  config: ImageGeneratorConfig;
 }
 
-// CanvasRender Node
-export type LayoutType = 'top-bottom' | 'side-by-side' | 'overlay';
-export type DimensionPreset = 'instagram-square' | 'instagram-story' | 'tiktok' | 'twitter' | 'custom';
+export type VideoGenMode = 'text2video' | 'img2video';
+export type VideoDuration = '3s' | '5s' | '10s';
+export type VideoResolution = '480p' | '720p';
 
-export interface CanvasRenderConfig {
-  layout: LayoutType;
-  preset: DimensionPreset;
+export interface VideoGeneratorConfig {
+  mode: VideoGenMode;
+  duration: VideoDuration;
+  resolution: VideoResolution;
+  fps: 24 | 30;
+}
+
+export interface VideoGeneratorData extends BaseNodeData {
+  config: VideoGeneratorConfig;
+}
+
+// --- COMPOSE NODES ---
+
+export type TextPosition = 'top' | 'center' | 'bottom' | 'custom';
+export type FontFamily = 'inter' | 'impact' | 'arabic-display' | 'comic-neue';
+export type TextEffect = 'none' | 'shadow' | 'glow' | 'gradient';
+
+export interface TextOverlayConfig {
+  text: string;
+  position: TextPosition;
+  font: FontFamily;
+  fontSize: number;
+  fontColor: string;
+  stroke: boolean;
+  effect: TextEffect;
+}
+
+export interface TextOverlayData extends BaseNodeData {
+  config: TextOverlayConfig;
+}
+
+// --- OUTPUT NODES ---
+
+export type PreviewPreset =
+  | 'ig-square'
+  | 'ig-story'
+  | 'tiktok'
+  | 'twitter'
+  | 'whatsapp-status'
+  | 'custom';
+export type FitMode = 'cover' | 'contain' | 'fill';
+
+export interface PreviewConfig {
+  preset: PreviewPreset;
   width: number;
   height: number;
   backgroundColor: string;
+  fit: FitMode;
 }
 
-export interface CanvasRenderData extends BaseNodeData {
-  config: CanvasRenderConfig;
+export interface PreviewData extends BaseNodeData {
+  config: PreviewConfig;
 }
 
-// Export Node
-export type ExportFormat = 'png' | 'jpg' | 'gif' | 'mp4';
+export type ExportFormat = 'png' | 'jpg' | 'webp' | 'mp4' | 'gif';
+export type ShareTarget = 'download' | 'whatsapp' | 'clipboard';
 
 export interface ExportConfig {
   format: ExportFormat;
   quality: number;
-  shareLink: string | null;
+  shareTarget: ShareTarget;
 }
 
 export interface ExportData extends BaseNodeData {
@@ -114,77 +191,179 @@ export interface ExportData extends BaseNodeData {
 
 // Union type of all node data
 export type CustomNodeData =
-  | TrendSeedData
-  | TextInputData
-  | AITextGeneratorData
-  | HumorStyleData
-  | VariantBatchData
-  | CanvasRenderData
+  | TextPromptData
+  | ImageUploadData
+  | TemplatePresetData
+  | PromptEnhancerData
+  | StyleConfigData
+  | ImageGeneratorData
+  | VideoGeneratorData
+  | TextOverlayData
+  | PreviewData
   | ExportData;
 
 // Typed node definitions
-export type TrendSeedNode = Node<TrendSeedData, 'trendSeed'>;
-export type TextInputNode = Node<TextInputData, 'textInput'>;
-export type AITextGeneratorNode = Node<AITextGeneratorData, 'aiTextGenerator'>;
-export type HumorStyleNode = Node<HumorStyleData, 'humorStyle'>;
-export type VariantBatchNode = Node<VariantBatchData, 'variantBatch'>;
-export type CanvasRenderNode = Node<CanvasRenderData, 'canvasRender'>;
+export type TextPromptNode = Node<TextPromptData, 'textPrompt'>;
+export type ImageUploadNode = Node<ImageUploadData, 'imageUpload'>;
+export type TemplatePresetNode = Node<TemplatePresetData, 'templatePreset'>;
+export type PromptEnhancerNode = Node<PromptEnhancerData, 'promptEnhancer'>;
+export type StyleConfigNode = Node<StyleConfigData, 'styleConfig'>;
+export type ImageGeneratorNode = Node<ImageGeneratorData, 'imageGenerator'>;
+export type VideoGeneratorNode = Node<VideoGeneratorData, 'videoGenerator'>;
+export type TextOverlayNode = Node<TextOverlayData, 'textOverlay'>;
+export type PreviewNode = Node<PreviewData, 'preview'>;
 export type ExportNode = Node<ExportData, 'export'>;
 
 // Union of all custom nodes
 export type CustomNode =
-  | TrendSeedNode
-  | TextInputNode
-  | AITextGeneratorNode
-  | HumorStyleNode
-  | VariantBatchNode
-  | CanvasRenderNode
+  | TextPromptNode
+  | ImageUploadNode
+  | TemplatePresetNode
+  | PromptEnhancerNode
+  | StyleConfigNode
+  | ImageGeneratorNode
+  | VideoGeneratorNode
+  | TextOverlayNode
+  | PreviewNode
   | ExportNode;
 
+// Port schemas for each node type
+export const NODE_PORT_SCHEMAS: Record<CustomNodeType, NodePortSchema> = {
+  textPrompt: {
+    inputs: [],
+    outputs: [{ id: 'text', type: 'text', label: 'Text', required: true }],
+  },
+  imageUpload: {
+    inputs: [],
+    outputs: [{ id: 'image', type: 'image', label: 'Image', required: true }],
+  },
+  templatePreset: {
+    inputs: [],
+    outputs: [
+      { id: 'text', type: 'text', label: 'Text', required: true },
+      { id: 'style', type: 'style', label: 'Style', required: true },
+    ],
+  },
+  promptEnhancer: {
+    inputs: [
+      { id: 'text', type: 'text', label: 'Text', required: true },
+      { id: 'style', type: 'style', label: 'Style', required: false },
+    ],
+    outputs: [{ id: 'prompt', type: 'prompt', label: 'Prompt', required: true }],
+  },
+  styleConfig: {
+    inputs: [],
+    outputs: [{ id: 'style', type: 'style', label: 'Style', required: true }],
+  },
+  imageGenerator: {
+    inputs: [
+      { id: 'prompt', type: 'prompt', label: 'Prompt', required: true },
+      { id: 'style', type: 'style', label: 'Style', required: false },
+      { id: 'image', type: 'image', label: 'Reference', required: false },
+    ],
+    outputs: [{ id: 'image', type: 'image', label: 'Image', required: true }],
+  },
+  videoGenerator: {
+    inputs: [
+      { id: 'prompt', type: 'prompt', label: 'Prompt', required: true },
+      { id: 'style', type: 'style', label: 'Style', required: false },
+      { id: 'image', type: 'image', label: 'Reference', required: false },
+    ],
+    outputs: [{ id: 'video', type: 'video', label: 'Video', required: true }],
+  },
+  textOverlay: {
+    inputs: [
+      { id: 'image', type: 'image', label: 'Image', required: true },
+      { id: 'text', type: 'text', label: 'Text', required: false },
+    ],
+    outputs: [{ id: 'image', type: 'image', label: 'Image', required: true }],
+  },
+  preview: {
+    inputs: [{ id: 'media', type: 'media', label: 'Media', required: true }],
+    outputs: [{ id: 'media', type: 'media', label: 'Media', required: true }],
+  },
+  export: {
+    inputs: [{ id: 'media', type: 'media', label: 'Media', required: true }],
+    outputs: [],
+  },
+};
+
 // Default configs for each node type
-export const defaultConfigs = {
-  trendSeed: {
-    topic: '',
-    keywords: [],
-    trending: true,
-  } satisfies TrendSeedConfig,
-
-  textInput: {
+export const defaultConfigs: Record<CustomNodeType, Record<string, unknown>> = {
+  textPrompt: {
     text: '',
-    maxLength: 500,
-  } satisfies TextInputConfig,
+    maxLength: 1000,
+    placeholder: 'Describe what you want to create...',
+  } satisfies TextPromptConfig,
 
-  aiTextGenerator: {
-    prompt: '',
-    temperature: 0.7,
-    maxTokens: 150,
-    outputCount: 3,
-    generatedOutputs: [],
-  } satisfies AITextGeneratorConfig,
+  imageUpload: {
+    previewUrl: null,
+    fileName: null,
+    fileSizeMB: null,
+    maxSizeMB: 10,
+  } satisfies ImageUploadConfig,
 
-  humorStyle: {
-    style: 'receh' as HumorStyleType,
-    intensity: 50,
-    language: 'id' as const,
-  } satisfies HumorStyleConfig,
+  templatePreset: {
+    template: 'blank',
+    locale: 'id',
+  } satisfies TemplatePresetConfig,
 
-  variantBatch: {
-    count: 5,
-    randomize: true,
+  promptEnhancer: {
+    creativity: 'balanced',
+    contentType: 'general',
+    tone: 'casual',
+    language: 'id',
+  } satisfies PromptEnhancerConfig,
+
+  styleConfig: {
+    artStyle: 'realistic',
+    colorPalette: [],
+    mood: 'warm',
+    culturalTheme: null,
+  } satisfies StyleConfigConfig,
+
+  imageGenerator: {
+    mode: 'text2img',
+    dimensions: 'square-1024',
+    steps: 30,
     seed: null,
-  } satisfies VariantBatchConfig,
+  } satisfies ImageGeneratorConfig,
 
-  canvasRender: {
-    layout: 'top-bottom' as LayoutType,
-    preset: 'instagram-square' as DimensionPreset,
+  videoGenerator: {
+    mode: 'text2video',
+    duration: '5s',
+    resolution: '720p',
+    fps: 24,
+  } satisfies VideoGeneratorConfig,
+
+  textOverlay: {
+    text: '',
+    position: 'bottom',
+    font: 'inter',
+    fontSize: 48,
+    fontColor: '#ffffff',
+    stroke: true,
+    effect: 'shadow',
+  } satisfies TextOverlayConfig,
+
+  preview: {
+    preset: 'ig-square',
     width: 1080,
     height: 1080,
-    backgroundColor: '#ffffff',
-  } satisfies CanvasRenderConfig,
+    backgroundColor: '#000000',
+    fit: 'cover',
+  } satisfies PreviewConfig,
 
   export: {
-    format: 'png' as ExportFormat,
+    format: 'png',
     quality: 90,
-    shareLink: null,
+    shareTarget: 'download',
   } satisfies ExportConfig,
-} as const;
+};
+
+// Runnable node types (have a "Run" button)
+export const RUNNABLE_NODE_TYPES: CustomNodeType[] = [
+  'promptEnhancer',
+  'imageGenerator',
+  'videoGenerator',
+];

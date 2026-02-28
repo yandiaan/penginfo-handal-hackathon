@@ -1,77 +1,77 @@
 import type { Node, Edge } from '@xyflow/react';
 import { defaultConfigs } from '../types/node-types';
 
+// Blank canvas — minimal starting point
 export const initialNodes: Node[] = [
   {
     id: '1',
-    type: 'trendSeed',
+    type: 'textPrompt',
     data: {
-      label: 'Trend Seed',
-      isExpanded: true,
+      label: 'Text Prompt',
       config: {
-        ...defaultConfigs.trendSeed,
-        topic: 'THR',
-        keywords: ['THR', 'Lebaran', 'Bonus'],
+        ...defaultConfigs.textPrompt,
       },
     },
-    position: { x: 50, y: 100 },
+    position: { x: 50, y: 200 },
   },
   {
     id: '2',
-    type: 'humorStyle',
+    type: 'promptEnhancer',
     data: {
-      label: 'Humor Style',
-      isExpanded: true,
+      label: 'Prompt Enhancer',
       config: {
-        ...defaultConfigs.humorStyle,
-        style: 'receh',
-        intensity: 70,
+        ...defaultConfigs.promptEnhancer,
       },
     },
-    position: { x: 400, y: 100 },
+    position: { x: 350, y: 200 },
   },
   {
     id: '3',
-    type: 'aiTextGenerator',
+    type: 'imageGenerator',
     data: {
-      label: 'AI Text Generator',
-      isExpanded: true,
+      label: 'Image Generator',
       config: {
-        ...defaultConfigs.aiTextGenerator,
-        prompt: 'Generate a funny punchline about {topic} in Indonesian',
-        outputCount: 5,
+        ...defaultConfigs.imageGenerator,
       },
     },
-    position: { x: 750, y: 100 },
+    position: { x: 650, y: 200 },
   },
   {
     id: '4',
-    type: 'variantBatch',
+    type: 'preview',
     data: {
-      label: 'Variant Batch',
-      isExpanded: false,
+      label: 'Preview',
       config: {
-        ...defaultConfigs.variantBatch,
-        count: 10,
+        ...defaultConfigs.preview,
       },
     },
-    position: { x: 1100, y: 100 },
-  },
-  {
-    id: '5',
-    type: 'export',
-    data: {
-      label: 'Export',
-      isExpanded: false,
-      config: defaultConfigs.export,
-    },
-    position: { x: 1100, y: 400 },
+    position: { x: 950, y: 200 },
   },
 ];
 
 export const initialEdges: Edge[] = [
-  { id: 'e1-2', source: '1', target: '2', animated: true },
-  { id: 'e2-3', source: '2', target: '3', animated: true },
-  { id: 'e3-4', source: '3', target: '4', animated: true },
-  { id: 'e4-5', source: '4', target: '5' },
+  {
+    id: 'e1-2',
+    source: '1',
+    target: '2',
+    sourceHandle: 'text',
+    targetHandle: 'text',
+    animated: true,
+  },
+  {
+    id: 'e2-3',
+    source: '2',
+    target: '3',
+    sourceHandle: 'prompt',
+    targetHandle: 'prompt',
+    animated: true,
+  },
+  {
+    id: 'e3-4',
+    source: '3',
+    target: '4',
+    sourceHandle: 'image',
+    targetHandle: 'media',
+    animated: true,
+  },
 ];

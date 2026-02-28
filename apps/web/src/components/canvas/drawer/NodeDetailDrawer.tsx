@@ -1,16 +1,18 @@
 import { useReactFlow, type Node } from '@xyflow/react';
-import { drawerStyles } from '../styles/drawer';
 import { NODE_TYPE_CONFIGS, NODE_CATEGORIES } from '../config/nodeCategories';
 import type { CustomNodeType, CustomNodeData } from '../types/node-types';
 
 // Panel imports
-import { TrendSeedPanel } from './panels/TrendSeedPanel';
-import { TextInputPanel } from './panels/TextInputPanel';
-import { AITextGeneratorPanel } from './panels/AITextGeneratorPanel';
-import { HumorStylePanel } from './panels/HumorStylePanel';
-import { VariantBatchPanel } from './panels/VariantBatchPanel';
-import { CanvasRenderPanel } from './panels/CanvasRenderPanel';
-import { ExportPanel } from './panels/ExportPanel';
+import { TextPromptPanel } from './panels/TextPromptPanel';
+import { ImageUploadPanel } from './panels/ImageUploadPanel';
+import { TemplatePresetPanel } from './panels/TemplatePresetPanel';
+import { PromptEnhancerPanel } from './panels/PromptEnhancerPanel';
+import { StyleConfigPanel } from './panels/StyleConfigPanel';
+import { ImageGeneratorPanel } from './panels/ImageGeneratorPanel';
+import { VideoGeneratorPanel } from './panels/VideoGeneratorPanel';
+import { TextOverlayPanel } from './panels/TextOverlayPanel';
+import { PreviewPanel } from './panels/PreviewPanel';
+import { ExportPanelNew } from './panels/ExportPanelNew';
 
 type Props = {
   selectedNode: Node<CustomNodeData> | null;
@@ -33,71 +35,63 @@ export function NodeDetailDrawer({ selectedNode, onClose }: Props) {
 
   const renderPanel = () => {
     switch (nodeType) {
-      case 'trendSeed':
-        return <TrendSeedPanel nodeId={selectedNode.id} data={selectedNode.data} />;
-      case 'textInput':
-        return <TextInputPanel nodeId={selectedNode.id} data={selectedNode.data} />;
-      case 'aiTextGenerator':
-        return <AITextGeneratorPanel nodeId={selectedNode.id} data={selectedNode.data} />;
-      case 'humorStyle':
-        return <HumorStylePanel nodeId={selectedNode.id} data={selectedNode.data} />;
-      case 'variantBatch':
-        return <VariantBatchPanel nodeId={selectedNode.id} data={selectedNode.data} />;
-      case 'canvasRender':
-        return <CanvasRenderPanel nodeId={selectedNode.id} data={selectedNode.data} />;
+      case 'textPrompt':
+        return <TextPromptPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'imageUpload':
+        return <ImageUploadPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'templatePreset':
+        return <TemplatePresetPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'promptEnhancer':
+        return <PromptEnhancerPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'styleConfig':
+        return <StyleConfigPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'imageGenerator':
+        return <ImageGeneratorPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'videoGenerator':
+        return <VideoGeneratorPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'textOverlay':
+        return <TextOverlayPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'preview':
+        return <PreviewPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
       case 'export':
-        return <ExportPanel nodeId={selectedNode.id} data={selectedNode.data} />;
+        return <ExportPanelNew nodeId={selectedNode.id} data={selectedNode.data as any} />;
       default:
-        return <div style={{ color: 'rgba(255,255,255,0.5)' }}>Unknown node type</div>;
+        return <div className="text-white/50">Unknown node type</div>;
     }
   };
 
   return (
-    <div style={drawerStyles.overlay}>
+    <div className="fixed top-0 right-0 bottom-0 w-[380px] bg-[rgba(20,20,30,0.98)] border-l border-white/10 shadow-[-8px_0_32px_rgba(0,0,0,0.5)] z-[1000] flex flex-col font-[Inter,system-ui,sans-serif] transition-transform duration-300">
       {/* Header */}
       <div
-        style={{
-          ...drawerStyles.header,
-          borderBottom: `1px solid ${category?.borderColor || 'rgba(255,255,255,0.1)'}`,
-        }}
+        className="flex items-center justify-between px-6 py-5"
+        style={{ borderBottom: `1px solid ${category?.borderColor || 'rgba(255,255,255,0.1)'}` }}
       >
-        <div style={drawerStyles.headerLeft}>
-          <span style={drawerStyles.headerIcon}>{nodeConfig?.icon}</span>
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{nodeConfig?.icon}</span>
           <div>
-            <div style={{ ...drawerStyles.headerTitle, color: category?.color }}>
+            <div className="text-lg font-semibold" style={{ color: category?.color }}>
               {nodeConfig?.label || 'Node'}
             </div>
-            <div style={drawerStyles.headerSubtitle}>{nodeConfig?.description}</div>
+            <div className="text-xs text-white/50 mt-0.5">{nodeConfig?.description}</div>
           </div>
         </div>
         <button
           onClick={onClose}
-          style={drawerStyles.closeButton}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-          }}
+          className="w-8 h-8 flex items-center justify-center bg-white/5 border border-white/10 rounded-lg text-white/60 text-lg cursor-pointer transition-all duration-200 hover:bg-white/10"
         >
           ×
         </button>
       </div>
 
       {/* Content */}
-      <div style={drawerStyles.content}>{renderPanel()}</div>
+      <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-5">{renderPanel()}</div>
 
       {/* Footer */}
-      <div style={drawerStyles.footer}>
+      <div className="px-6 py-4 border-t border-white/10 flex gap-3">
         <button
           onClick={handleDelete}
-          style={drawerStyles.deleteButton}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(248, 113, 113, 0.2)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = 'rgba(248, 113, 113, 0.1)';
-          }}
+          className="flex-1 py-3 px-4 bg-red-400/10 border border-red-400/30 rounded-lg text-red-400 text-[13px] font-medium cursor-pointer transition-all duration-200 hover:bg-red-400/20"
         >
           🗑️ Delete Node
         </button>

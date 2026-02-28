@@ -3,35 +3,44 @@ import type { ComponentType } from 'react';
 import type { NodeProps } from '@xyflow/react';
 
 // Import all node components
-import { TrendSeedNode } from './input/TrendSeedNode';
-import { TextInputNode } from './input/TextInputNode';
-import { AITextGeneratorNode } from './generator/AITextGeneratorNode';
-import { HumorStyleNode } from './modifier/HumorStyleNode';
-import { VariantBatchNode } from './variant/VariantBatchNode';
-import { CanvasRenderNode } from './output/CanvasRenderNode';
-import { ExportNode } from './output/ExportNode';
+import { TextPromptNode } from './input/TextPromptNode';
+import { ImageUploadNode } from './input/ImageUploadNode';
+import { TemplatePresetNode } from './input/TemplatePresetNode';
+import { PromptEnhancerNode } from './transform/PromptEnhancerNode';
+import { StyleConfigNode } from './transform/StyleConfigNode';
+import { ImageGeneratorNode } from './generate/ImageGeneratorNode';
+import { VideoGeneratorNode } from './generate/VideoGeneratorNode';
+import { TextOverlayNode } from './compose/TextOverlayNode';
+import { PreviewNode } from './output/PreviewNode';
+import { ExportNode } from './output/ExportNodeNew';
 
 import type { CustomNodeType } from '../types/node-types';
 
 // Re-export components
-export { TrendSeedNode } from './input/TrendSeedNode';
-export { TextInputNode } from './input/TextInputNode';
-export { AITextGeneratorNode } from './generator/AITextGeneratorNode';
-export { HumorStyleNode } from './modifier/HumorStyleNode';
-export { VariantBatchNode } from './variant/VariantBatchNode';
-export { CanvasRenderNode } from './output/CanvasRenderNode';
-export { ExportNode } from './output/ExportNode';
+export { TextPromptNode } from './input/TextPromptNode';
+export { ImageUploadNode } from './input/ImageUploadNode';
+export { TemplatePresetNode } from './input/TemplatePresetNode';
+export { PromptEnhancerNode } from './transform/PromptEnhancerNode';
+export { StyleConfigNode } from './transform/StyleConfigNode';
+export { ImageGeneratorNode } from './generate/ImageGeneratorNode';
+export { VideoGeneratorNode } from './generate/VideoGeneratorNode';
+export { TextOverlayNode } from './compose/TextOverlayNode';
+export { PreviewNode } from './output/PreviewNode';
+export { ExportNode } from './output/ExportNodeNew';
 export { CompactNode } from './CompactNode';
 
 // Node types registry for ReactFlow
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export const nodeTypes: Record<CustomNodeType, ComponentType<NodeProps<any>>> = {
-  trendSeed: TrendSeedNode,
-  textInput: TextInputNode,
-  aiTextGenerator: AITextGeneratorNode,
-  humorStyle: HumorStyleNode,
-  variantBatch: VariantBatchNode,
-  canvasRender: CanvasRenderNode,
+  textPrompt: TextPromptNode,
+  imageUpload: ImageUploadNode,
+  templatePreset: TemplatePresetNode,
+  promptEnhancer: PromptEnhancerNode,
+  styleConfig: StyleConfigNode,
+  imageGenerator: ImageGeneratorNode,
+  videoGenerator: VideoGeneratorNode,
+  textOverlay: TextOverlayNode,
+  preview: PreviewNode,
   export: ExportNode,
 };
 

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import {
   Background,
   BackgroundVariant,
@@ -12,15 +12,24 @@ import {
 import '@xyflow/react/dist/style.css';
 import { useFlowNodes } from './hooks/useFlowNodes';
 import { useMouseMode } from './hooks/useMouseMode';
+import { useTemplateLoader } from './hooks/useTemplateLoader';
+import { useExecutionStore } from './execution/store';
+import { ExecutionContext } from './execution/ExecutionContext';
+import { runPipeline } from './execution/runner';
 import { FlowToolbar } from './FlowToolbar';
 import { nodeTypes } from './nodes';
 import { NodeDetailDrawer } from './drawer/NodeDetailDrawer';
 import type { CustomNodeData } from './types/node-types';
 
 export function FlowCanvasInner() {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode } = useFlowNodes();
+  const { nodes, edges, setNodes, setEdges, onNodesChange, onEdgesChange, onConnect, addNode } =
+    useFlowNodes();
   const { mode, setMode } = useMouseMode();
   const [selectedNode, setSelectedNode] = useState<Node<CustomNodeData> | null>(null);
+  const executionStore = useExecutionStore();
+
+  // Load template from URL params on mount
+  useTemplateLoader(setNodes, setEdges);
 
   const handleNodeClick: NodeMouseHandler<Node<CustomNodeData>> = useCallback((_, node) => {
     setSelectedNode(node);
@@ -34,39 +43,56 @@ export function FlowCanvasInner() {
     setSelectedNode(null);
   }, []);
 
+  const handleRunPipeline = useCallback(async () => {
+    await runPipeline(nodes, edges, executionStore);
+  }, [nodes, edges, executionStore]);
+
   // Keep drawer in sync with node data changes
   const currentSelectedNode = selectedNode
     ? nodes.find((n) => n.id === selectedNode.id) || null
     : null;
 
-  return (
-    <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes as any}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onNodeClick={handleNodeClick as any}
-        onPaneClick={handlePaneClick}
-        fitView
-        panOnDrag={mode === 'pan'}
-        selectionOnDrag={mode === 'select'}
-        selectionMode={SelectionMode.Partial}
-        panOnScroll={mode === 'select'}
-      >
-        <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
-        <Controls style={{ color: 'black' }} />
-        <MiniMap nodeStrokeWidth={3} zoomable pannable />
-        <FlowToolbar mode={mode} onModeChange={setMode} onAddNode={addNode} />
-      </ReactFlow>
+  const executionContextValue = useMemo(
+    () => ({ getNodeState: executionStore.getNodeState }),
+    [executionStore.getNodeState],
+  );
 
-      {/* Node Detail Drawer */}
-      <NodeDetailDrawer
-        selectedNode={currentSelectedNode as Node<CustomNodeData> | null}
-        onClose={handleCloseDrawer}
-      />
-    </div>
+  return (
+    <ExecutionContext.Provider value={executionContextValue}>
+      <div className="w-full h-full relative">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes as any}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onNodeClick={handleNodeClick as any}
+          onPaneClick={handlePaneClick}
+          fitView
+          panOnDrag={mode === 'pan'}
+          selectionOnDrag={mode === 'select'}
+          selectionMode={SelectionMode.Partial}
+          panOnScroll={mode === 'select'}
+        >
+          <Background variant={BackgroundVariant.Dots} gap={16} size={1} />
+          <Controls className="text-black" />
+          <MiniMap nodeStrokeWidth={3} zoomable pannable />
+          <FlowToolbar
+            mode={mode}
+            onModeChange={setMode}
+            onAddNode={addNode}
+            onRunPipeline={handleRunPipeline}
+            pipelineRunning={executionStore.pipelineRunning}
+          />
+        </ReactFlow>
+
+        {/* Node Detail Drawer */}
+        <NodeDetailDrawer
+          selectedNode={currentSelectedNode as Node<CustomNodeData> | null}
+          onClose={handleCloseDrawer}
+        />
+      </div>
+    </ExecutionContext.Provider>
   );
 }

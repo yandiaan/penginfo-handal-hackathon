@@ -27,37 +27,29 @@ export const NODE_CATEGORIES: Record<NodeCategory, NodeCategoryConfig> = {
     bgColor: 'rgba(74, 222, 128, 0.1)',
     borderColor: 'rgba(74, 222, 128, 0.5)',
   },
-  generator: {
-    id: 'generator',
-    label: 'Generator',
-    icon: '🤖',
+  transform: {
+    id: 'transform',
+    label: 'Transform',
+    icon: '🔄',
     color: '#a78bfa',
     bgColor: 'rgba(167, 139, 250, 0.1)',
     borderColor: 'rgba(167, 139, 250, 0.5)',
   },
-  modifier: {
-    id: 'modifier',
-    label: 'Modifier',
-    icon: '🎨',
+  generate: {
+    id: 'generate',
+    label: 'Generate',
+    icon: '🤖',
     color: '#60a5fa',
     bgColor: 'rgba(96, 165, 250, 0.1)',
     borderColor: 'rgba(96, 165, 250, 0.5)',
   },
-  character: {
-    id: 'character',
-    label: 'Character',
-    icon: '👤',
+  compose: {
+    id: 'compose',
+    label: 'Compose',
+    icon: '🎨',
     color: '#f59e0b',
     bgColor: 'rgba(245, 158, 11, 0.1)',
     borderColor: 'rgba(245, 158, 11, 0.5)',
-  },
-  variant: {
-    id: 'variant',
-    label: 'Variant',
-    icon: '🔀',
-    color: '#ec4899',
-    bgColor: 'rgba(236, 72, 153, 0.1)',
-    borderColor: 'rgba(236, 72, 153, 0.5)',
   },
   output: {
     id: 'output',
@@ -73,50 +65,71 @@ export const NODE_CATEGORIES: Record<NodeCategory, NodeCategoryConfig> = {
 export const NODE_TYPE_CONFIGS: NodeTypeConfig[] = [
   // Input nodes
   {
-    type: 'trendSeed',
+    type: 'textPrompt',
     category: 'input',
-    label: 'Trend Seed',
-    icon: '🔥',
-    description: 'Enter trending topics and themes',
-  },
-  {
-    type: 'textInput',
-    category: 'input',
-    label: 'Text Input',
+    label: 'Text Prompt',
     icon: '📝',
-    description: 'Free text input',
+    description: 'Enter text or prompts for content generation',
   },
-  // Generator nodes
   {
-    type: 'aiTextGenerator',
-    category: 'generator',
-    label: 'AI Text Generator',
+    type: 'imageUpload',
+    category: 'input',
+    label: 'Image Upload',
+    icon: '🖼️',
+    description: 'Upload a reference image',
+  },
+  {
+    type: 'templatePreset',
+    category: 'input',
+    label: 'Template Preset',
+    icon: '📋',
+    description: 'Start from a pre-built template',
+  },
+  // Transform nodes
+  {
+    type: 'promptEnhancer',
+    category: 'transform',
+    label: 'Prompt Enhancer',
     icon: '✨',
-    description: 'Generate text with AI (punchlines, captions)',
+    description: 'Enhance prompts with AI (Qwen)',
   },
-  // Modifier nodes
   {
-    type: 'humorStyle',
-    category: 'modifier',
-    label: 'Humor Style',
-    icon: '😂',
-    description: 'Apply humor style (receh, satir, relatable)',
+    type: 'styleConfig',
+    category: 'transform',
+    label: 'Style Config',
+    icon: '🎭',
+    description: 'Configure art style, mood, and cultural theme',
   },
-  // Variant nodes
+  // Generate nodes
   {
-    type: 'variantBatch',
-    category: 'variant',
-    label: 'Variant Batch',
-    icon: '🎲',
-    description: 'Generate multiple variations',
+    type: 'imageGenerator',
+    category: 'generate',
+    label: 'Image Generator',
+    icon: '🖌️',
+    description: 'Generate images with AI (Wan)',
+  },
+  {
+    type: 'videoGenerator',
+    category: 'generate',
+    label: 'Video Generator',
+    icon: '🎬',
+    description: 'Generate short videos with AI (Wan)',
+  },
+  // Compose nodes
+  {
+    type: 'textOverlay',
+    category: 'compose',
+    label: 'Text Overlay',
+    icon: '🔤',
+    description: 'Add styled text on top of images',
   },
   // Output nodes
   {
-    type: 'canvasRender',
+    type: 'preview',
     category: 'output',
-    label: 'Canvas Render',
-    icon: '🖼️',
-    description: 'Preview and compose final output',
+    label: 'Preview',
+    icon: '👁️',
+    description: 'Preview output in social media dimensions',
   },
   {
     type: 'export',

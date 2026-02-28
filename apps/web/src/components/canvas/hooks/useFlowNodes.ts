@@ -11,6 +11,7 @@ import { initialEdges, initialNodes } from '../config/initialElements';
 import type { CustomNodeType, CustomNodeData } from '../types/node-types';
 import { defaultConfigs } from '../types/node-types';
 import { NODE_TYPE_CONFIGS } from '../config/nodeCategories';
+import { validateConnection } from './useConnectionValidation';
 
 // Create default node data for a given node type
 function createDefaultNodeData(nodeType: CustomNodeType): CustomNodeData {
@@ -19,38 +20,42 @@ function createDefaultNodeData(nodeType: CustomNodeType): CustomNodeData {
 
   const baseData = {
     label,
-    isExpanded: true,
   };
 
-  switch (nodeType) {
-    case 'trendSeed':
-      return { ...baseData, config: { ...defaultConfigs.trendSeed } };
-    case 'textInput':
-      return { ...baseData, config: { ...defaultConfigs.textInput } };
-    case 'aiTextGenerator':
-      return { ...baseData, config: { ...defaultConfigs.aiTextGenerator } };
-    case 'humorStyle':
-      return { ...baseData, config: { ...defaultConfigs.humorStyle } };
-    case 'variantBatch':
-      return { ...baseData, config: { ...defaultConfigs.variantBatch } };
-    case 'canvasRender':
-      return { ...baseData, config: { ...defaultConfigs.canvasRender } };
-    case 'export':
-      return { ...baseData, config: { ...defaultConfigs.export } };
-    default:
-      return { ...baseData, config: {} };
+  const config = defaultConfigs[nodeType];
+  if (config) {
+    return { ...baseData, config: { ...config } } as CustomNodeData;
   }
+  return { ...baseData, config: {} } as unknown as CustomNodeData;
 }
 
 export function useFlowNodes() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
-  const { screenToFlowPosition } = useReactFlow();
+  const { screenToFlowPosition, getNode } = useReactFlow();
   const idCounter = useRef(initialNodes.length + 1);
 
   const onConnect: OnConnect = useCallback(
-    (connection) => setEdges((eds) => addEdge(connection, eds)),
-    [setEdges],
+    (connection) => {
+      const { source, target, sourceHandle, targetHandle } = connection;
+      if (!source || !target || !sourceHandle || !targetHandle) return;
+
+      const sourceNode = getNode(source);
+      const targetNode = getNode(target);
+      if (!sourceNode?.type || !targetNode?.type) return;
+
+      const valid = validateConnection(
+        sourceNode.type as CustomNodeType,
+        targetNode.type as CustomNodeType,
+        sourceHandle,
+        targetHandle,
+      );
+
+      if (valid) {
+        setEdges((eds) => addEdge(connection, eds));
+      }
+    },
+    [setEdges, getNode],
   );
 
   const addNode = useCallback(
@@ -72,5 +77,14 @@ export function useFlowNodes() {
     [screenToFlowPosition, setNodes],
   );
 
-  return { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode } as const;
+  return {
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    addNode,
+  } as const;
 }
