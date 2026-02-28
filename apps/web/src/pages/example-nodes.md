@@ -1,472 +1,480 @@
-# 🧩 Complete Node Catalog (22 Nodes)
-
-## 📌 Node Catalog Overview
-
-| #          | NODE              | TIER | ROLE                      | EXEC   |
-| ---------- | ----------------- | ---- | ------------------------- | ------ |
-| **━━━━━**  | **📥 INPUT**      |      |                           |        |
-| 1          | TextPrompt        | MVP  | User text/description     | —      |
-| 2          | ImageUpload       | MVP  | Upload reference image    | —      |
-| 3          | TemplatePreset    | MVP  | Pre-made pipeline starter | —      |
-| 4 **NEW**  | ColorPalette      | MVP+ | Pick colors & palette     | —      |
-| **━━━━━**  | **⚙️ TRANSFORM**  |      |                           |        |
-| 5          | PromptEnhancer    | MVP  | Raw text → AI-optimized   | Qwen   |
-| 6          | StyleConfig       | MVP  | Art style + mood config   | —      |
-| 7 **NEW**  | ImageToText       | MVP+ | Describe image → text     | QwenVL |
-| 8 **NEW**  | TranslateText     | MVP+ | Translate between langs   | Qwen   |
-| 9 **NEW**  | BackgroundRemover | MVP+ | Remove image background   | Server |
-| 10 **NEW** | FaceCrop          | v2   | Detect & extract face     | Server |
-| **━━━━━**  | **🤖 GENERATE**   |      |                           |        |
-| 11         | ImageGenerator    | MVP  | text2img / img2img        | Wan    |
-| 12         | VideoGenerator    | MVP  | text2video / img2video    | Wan    |
-| 13 **NEW** | Inpainting        | MVP+ | Edit masked region of img | Wan    |
-| 14 **NEW** | ImageUpscaler     | MVP+ | Upscale resolution        | Server |
-| **━━━━━**  | **🎨 COMPOSE**    |      |                           |        |
-| 15         | TextOverlay       | MVP  | Text on image             | Client |
-| 16 **NEW** | FrameBorder       | MVP+ | Decorative frames         | Client |
-| 17 **NEW** | StickerLayer      | MVP+ | Emoji/sticker overlay     | Client |
-| 18 **NEW** | ColorFilter       | MVP+ | Color grading / filters   | Client |
-| 19 **NEW** | CollageLayout     | v2   | Multi-image arrangement   | Client |
-| **━━━━━**  | **📤 OUTPUT**     |      |                           |        |
-| 20         | Preview           | MVP  | View at target dimensions | Client |
-| 21         | Export            | MVP  | Download / share          | Server |
-| 22 **NEW** | Watermark         | v2   | Brand/attribution stamp   | Client |
-
-### 🏷️ Tier Legend
-
-- **MVP** (10 nodes): Core pipeline, launch-ready
-- **MVP+** (+8 nodes): Valuable additions post-launch
-- **v2** (+4 nodes): Power features for later
-
+---
+title: 'Complete Node Catalog'
+layout: ../layouts/main.astro
 ---
 
-## 🔥 New Node Deep-Dives
-
-### 📥 1. ColorPalette (#4)
-
-- **Category:** `input`
-- **Exec:** `none` (pure input)
-- **In:** —
-- **Out:** `[style]`
-
-**Kenapa Perlu:**
-`StyleConfig` udah punya `colorPalette`, tapi `ColorPalette` sebagai standalone node bikin user bisa:
-
-- Reuse 1 palette across multiple branches.
-- Feed palette ke `PromptEnhancer` (inject color words into prompt: _"emerald green and gold tones"_).
-- Feed ke `FrameBorder` + `TextOverlay` (consistent colors).
-
-**Config:**
-
-- `mode`: `'preset' | 'custom' | 'extract'`
-- `presets`:
-  - `'ramadan'` → `#1b5e20, #ffd700, #ffffff, #004d40`
-  - `'lebaran'` → `#4caf50, #ff9800, #f44336, #ffeb3b`
-  - `'christmas'` → `#c62828, #2e7d32, #ffd54f, #ffffff`
-  - `'imlek'` → `#d32f2f, #ffd600, #ff6f00, #b71c1c`
-  - `'pastel'` → `#f8bbd0, #b3e5fc, #c8e6c9, #fff9c4`
-  - `'cyberpunk'` → `#00e5ff, #e040fb, #1a1a2e, #0f0f23`
-  - `'earth'` → `#795548, #4caf50, #ff9800, #3e2723`
-- `custom`: `string[]` (user picks via color picker)
-- `extract`: from connected image (auto-extract palette)
-
-**Use-Case Mapping:**
-
-- **Ramadan Wishes:** `'ramadan'` preset
-- **Holiday Memes:** `'lebaran'` preset
-- **AI Pets:** `'pastel'` preset
-- **Avatars:** `'cyberpunk'` or custom
-
----
-
-### ⚙️ 2. ImageToText (#7) 🔵 RUNNABLE
-
-- **Category:** `transform`
-- **Exec:** `Qwen-VL` (server-side)
-- **In:** `[image]` (required)
-- **Out:** `[text]`
-
-**Kenapa Perlu:**
-Ini merupakan bridge antara image input dan text pipeline. Tanpa ini, kalau user upload image, pipeline ga tau apa isinya — cuma bisa pakai blind img2img.
-
-> `ImageUpload` → `ImageToText` → `PromptEnhancer` → `ImageGenerator`  
-> _"Here's my photo"_ → _"A young woman with short hair, wearing glasses, smiling"_ → _"Anime-style avatar of young woman with short hair and glasses, wearing traditional batik, vibrant colors, Studio Ghibli style"_ → **[GENERATED AVATAR]**
-
-**Config:**
-
-- `descriptionType`: `'detailed' | 'brief' | 'tags'`
-- `focus`: `'general' | 'face' | 'style' | 'mood' | 'objects'`
-- `language`: `'en' | 'id'`
-
-**Killer Use-Case:**
-Upload ANY image → AI describes it → enhance prompt → generate STYLIZED VERSION of that image (_"Photo → Anime"_, _"Photo → Watercolor"_, _"Photo → Islamic Art Style"_).
-
----
-
-### ⚙️ 3. TranslateText (#8) 🔵 RUNNABLE
-
-- **Category:** `transform`
-- **Exec:** `Qwen` (server-side)
-- **In:** `[text]` (required)
-- **Out:** `[text]`
-
-**Kenapa Perlu:**
-Content creator Indonesia sering butuh bilingual content (Ramadan wishes in Arabic + Indonesian, meme captions bilingual ID+EN). Juga, `PromptEnhancer` outputs English prompts, tapi user mau `TextOverlay` pakai Bahasa Indonesia.
-
-**Config:**
-
-- `from`: `'auto' | 'id' | 'en' | 'ar' | 'ja' | 'zh'`
-- `to`: `'id' | 'en' | 'ar' | 'ja' | 'zh'`
-- `tone`: `'formal' | 'casual' | 'poetic'`
-- `preserveEmoji`: `boolean`
-
-**Example Pipeline:**
-
-- `TextPrompt("Selamat Ramadan, semoga berkah")` → `TranslateText(to: 'ar')` → `TextOverlay (Arabic calligraphy)`
-- `TextPrompt(Indonesian)` → `TranslateText(to: 'en')` → `PromptEnhancer` → `ImageGenerator`
-
----
-
-### ⚙️ 4. BackgroundRemover (#9) 🔵 RUNNABLE
-
-- **Category:** `transform`
-- **Exec:** server-side (AI model)
-- **In:** `[image]` (required)
-- **Out:** `[image]` (transparent PNG)
-
-**Kenapa Perlu:**
-Essential untuk Avatar creation, sticker creation, meme creation, auto-extract subject.
-
-**Config:**
-
-- `model`: `'auto' | 'portrait' | 'general'`
-- `refinement`: `'fast' | 'precise'`
-- `edgeSoftness`: `number` (0-100, feathering)
-- `replaceBg`: `string | null`
-
-**Pipeline Examples:**
-
-- **Avatar:** `ImageUpload` → `BackgroundRemover` → `ImageToText` → `PromptEnhancer` → `ImageGenerator`
-- **Sticker:** `ImageGenerator` → `BackgroundRemover` → `FrameBorder` → `Export`
-
----
-
-### ⚙️ 5. FaceCrop (#10) 🔵 RUNNABLE
-
-- **Category:** `transform`
-- **Exec:** server-side
-- **In:** `[image]` (required)
-- **Out:** `[image]` (cropped face region)
-
-**Kenapa Perlu:**
-Avatar workflow seringkali dimulai dari group photo atau full-body shot. `FaceCrop` auto-detects wajah dan crop area wajah saja — jadi img2img fokus ke wajah.
-
-**Config:**
-
-- `padding`: `number` (% extra space around face)
-- `shape`: `'square' | 'circle' | 'original'`
-- `faceIndex`: `number` (if multiple faces detected)
-- `detectMultiple`: `boolean` (output multiple crops?)
-
-_(Tier: v2 - BackgroundRemover covers 80% use cases first)_
-
----
-
-### 🤖 6. Inpainting (#13) 🔵 RUNNABLE
-
-- **Category:** `generate`
-- **Exec:** `Wan` (server-side)
-- **In:** `[image]` (required), `[text]` (optional edit instruction)
-- **Out:** `[image]`
-
-**Kenapa Perlu:**
-ImageGenerator menghasilkan 90% bagus, tapi ada 1 area yang kurang. Tanpa Inpainting, user harus re-generate SELURUH gambar. `Inpainting = surgical edit`.
-
-**Config:**
-
-- `mask`: `MaskData` (user draws mask on drawer UI)
-- `instruction`: `string` ("replace with", "remove", "change")
-- `strength`: `number` (0-100)
-- `preserveContext`: `boolean`
-
-**Use Cases:**
-
-- **Ramadan card:** Inpaint to add/change Islamic motifs.
-- **Meme:** Change facial expression on character.
-- **AI Pet:** Fix weird AI artifacts on paws/ears.
-
----
-
-### 🤖 7. ImageUpscaler (#14) 🔵 RUNNABLE
-
-- **Category:** `generate`
-- **Exec:** server-side (AI upscale)
-- **In:** `[image]` (required)
-- **Out:** `[image]` (high-res)
-
-**Kenapa Perlu:**
-`Wan` generates at fixed resolutions. Sosial media butuh higher res: IG Story (1080x1920), Print (2400x3000+). Upscaler preserves detail better than simple resize.
-
-**Config:**
-
-- `scale`: `'2x' | '4x'`
-- `model`: `'general' | 'face' | 'anime'`
-- `denoise`: `number` (0-100)
-- `targetDimension`: `{ width: number, height: number } | null`
-
----
-
-### 🎨 8. FrameBorder (#16)
-
-- **Category:** `compose`
-- **Exec:** client-side (Canvas API)
-- **In:** `[image]` (required), `[style]` (optional)
-- **Out:** `[image]`
-
-**Kenapa Perlu:**
-Content greeting/wishes BUTUH frame decoratif. Ini pembeda antara "gambar AI mentah" vs "konten siap share".
-
-**Config:**
-
-- `frameType`: `'solid' | 'gradient' | 'ornamental' | 'islamic' | 'floral' | 'polaroid' | 'torn-paper' | 'neon'`
-- `thickness`: `number` (px)
-- `cornerStyle`: `'square' | 'rounded' | 'ornate'`
-- `color`: `string | gradient` (from ColorPalette)
-- `innerShadow`: `boolean`
-- `pattern`: `string | null`
-
-**Built-In Frame Presets / Use-Cases:**
-
-- **Islamic Geometric:** Ramadan wishes
-- **Floral Garden:** General wishes
-- **Polaroid:** Aesthetic/retro (Cute AI Pets)
-- **Neon Glow:** Gen-Z/aesthetic (Avatars)
-- **Torn-paper:** Holiday Memes
-
----
-
-### 🎨 9. StickerLayer (#17)
-
-- **Category:** `compose`
-- **Exec:** client-side (Canvas API)
-- **In:** `[image]` (required)
-- **Out:** `[image]`
-
-**Kenapa Perlu:**
-Social media content tanpa sticker/emoji = kurang expressive. Ini layer terakhir untuk bikin konten terasa "social media native".
-
-**Config:**
-
-- `stickers`: Array of `{ id, src, x, y, scale, rotation, opacity }`
-- `pack`: `'emoji' | 'ramadan' | 'lebaran' | 'cute' | 'meme-faces' | 'sparkles'`
-
-**Packs:**
-
-- **Ramadan:** 🌙 ⭐ 🕌 🏮 📿 🤲 ☪️ 🌃
-- **Lebaran:** 🎆 🎊 💰 🧧 🎉 🤝 🎂 🏠
-- **Cute:** ✨ 💖 🌈 ⭐ 🎀 🌸 💫 🦋
-- **Meme:** 😂 💀 😭 🔥 💯 ⚡ 👀 🗿 😤
-
----
-
-### 🎨 10. ColorFilter (#18)
-
-- **Category:** `compose`
-- **Exec:** client-side (CSS/Canvas)
-- **In:** `[image]` (required)
-- **Out:** `[image]`
-
-**Kenapa Perlu:**
-AI-generated images often look "too clean" or inconsistent in color. `ColorFilter` = Instagram-like finishing pass yang bikin konten look cohesive. INSTANT preview, no API call needed.
-
-**Config:**
-
-- `filter`: `'none' | preset`
-- `brightness` / `contrast` / `saturation` / `warmth` / `vignette` / `grain`
-
-**Filter Presets:**
-| Preset | Effect |
-|---|---|
-| **Warm** | +warmth, +saturation, slight vignt |
-| **Cool** | -warmth, +contrast, blue tint |
-| **Vintage** | -saturation, +warmth, +grain |
-| **Dramatic**| +contrast, +vignette, -brightness |
-| **Dreamy** | -contrast, +brightness, soft |
-| **Neon** | +saturation, +contrast, vibrant |
-| **Matte** | lifted blacks, -contrast, flat |
-| **B&W** | saturation: -100 |
-| **Sepia** | B&W + warm tint |
-| **Eid Gold**| warm, golden highlights, rich 🔥 |
-| **Sahur** | cool blue-purple, low light mood 🔥 |
-
----
-
-### 🎨 11. CollageLayout (#19)
-
-- **Category:** `compose`
-- **Exec:** client-side (Canvas API)
-- **In:** `[image]` (multi — accepts 2-6 image connections)
-- **Out:** `[image]`
-
-**Kenapa Perlu:**
-Membuka output tipe baru: Before/After comparison, Expectation vs Reality, "POV" multi-panel, Pet evolution, Avatar variations.
-
-**Config:**
-
-- `layout`:
-  - `'grid-2x1'` `[■][■]`
-  - `'grid-1x2'` `[■]` `[■]`
-  - `'grid-2x2'`, `'grid-3x1'`, `'triptych'`, `'comic-4'`, `'freeform'`
-- `gap` / `borderRadius` / `backgroundColor` / `labels`
-
-_(Tier: v2 - complex UI, multi-input requires port system changes)_
-
----
-
-### 📤 12. Watermark (#22)
-
-- **Category:** `output`
-- **Exec:** client-side (Canvas API)
-- **In:** `[image]` (required)
-- **Out:** `[image]`
-
-**Kenapa Perlu:**
-
-- Attribution: "Made with [AppName]"
-- Creator branding, Anti-theft, Professional business look.
-
-**Config:**
-
-- `type`: `'text' | 'image'`
-- `position`: `'bottom-right' | 'bottom-left' | 'center' | 'top-right' | 'tiled'`
-- `opacity` / `size` / `color`
-
----
-
-## 🔌 Updated Connection Matrix
-
-### Full Port Compatibility Map
-
-| FROM NODE             | OUT TYPE   | VALID TARGETS                                                                                                                                                                                                                                                   |
-| --------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **TextPrompt**        | `[text]`   | `PromptEnhancer.text`, `TranslateText.text`, `TextOverlay.text`, `Inpainting.text`                                                                                                                                                                              |
-| **ImageUpload**       | `[image]`  | `ImageToText.image`, `BackgroundRemover.image`, `FaceCrop.image`, `ImageGenerator.image` (img2img), `VideoGenerator.image` (img2vid), `TextOverlay.image`, `Inpainting.image`, `ColorFilter.image`, `FrameBorder.image`, `CollageLayout.image`, `Preview.media` |
-| **TemplatePreset**    | `[text]`   | _(same as TextPrompt)_                                                                                                                                                                                                                                          |
-| **TemplatePreset**    | `[style]`  | `PromptEnhancer.style`, `ImageGenerator.style`, `VideoGenerator.style`, `FrameBorder.style`                                                                                                                                                                     |
-| **ColorPalette**      | `[style]`  | _(same as TemplatePreset.style)_                                                                                                                                                                                                                                |
-| **PromptEnhancer**    | `[prompt]` | `ImageGenerator.prompt`, `VideoGenerator.prompt` <br>_(❌ textOverlay: prompt ≠ text)_                                                                                                                                                                          |
-| **ImageToText**       | `[text]`   | _(same as TextPrompt)_                                                                                                                                                                                                                                          |
-| **TranslateText**     | `[text]`   | _(same as TextPrompt)_                                                                                                                                                                                                                                          |
-| **StyleConfig**       | `[style]`  | _(same as TemplatePreset.style)_                                                                                                                                                                                                                                |
-| **BackgroundRemover** | `[image]`  | _(same as ImageUpload)_                                                                                                                                                                                                                                         |
-| **FaceCrop**          | `[image]`  | _(same as ImageUpload)_                                                                                                                                                                                                                                         |
-| **ImageGenerator**    | `[image]`  | _(same as ImageUpload)_                                                                                                                                                                                                                                         |
-| **ImageUpscaler**     | `[image]`  | _(same as ImageUpload)_                                                                                                                                                                                                                                         |
-| **Inpainting**        | `[image]`  | _(same as ImageUpload)_                                                                                                                                                                                                                                         |
-| **TextOverlay**       | `[image]`  | _(same as ImageUpload)_                                                                                                                                                                                                                                         |
-| **FrameBorder**       | `[image]`  | _(same as ImageUpload)_                                                                                                                                                                                                                                         |
-| **StickerLayer**      | `[image]`  | _(same as ImageUpload)_                                                                                                                                                                                                                                         |
-| **ColorFilter**       | `[image]`  | _(same as ImageUpload)_                                                                                                                                                                                                                                         |
-| **CollageLayout**     | `[image]`  | _(same as ImageUpload)_                                                                                                                                                                                                                                         |
-| **Watermark**         | `[image]`  | _(same as ImageUpload)_                                                                                                                                                                                                                                         |
-| **VideoGenerator**    | `[video]`  | `Preview.media`, `Export.media` <br>_(❌ textOverlay: video ≠ image)_                                                                                                                                                                                           |
-| **Preview**           | `[media]`  | `Export.media`, `Watermark.image` (if image)                                                                                                                                                                                                                    |
-| **Export**            | `—`        | _(terminal node, no output)_                                                                                                                                                                                                                                    |
-
----
-
-## 🎯 Use-Cases With Full Node Catalog
-
-### 1️⃣ Ramadan Wishes _(Advanced)_
-
-- **Nodes Used:** 11
-- **Flow:**
-  1. `TemplatePreset("ramadan")` → `TranslateText(to: 'ar')` → `TextOverlay(1)`
-  2. `TemplatePreset("ramadan")` → `PromptEnhancer` (style)
-  3. `TextPrompt("warm family")` → `PromptEnhancer` (text)
-  4. `PromptEnhancer` → `ImageGenerator`
-  5. `ImageGenerator` → `FrameBorder`
-  6. `ColorPalette("ramadan")` → `FrameBorder("islamic")`
-  7. `FrameBorder` → `StickerLayer(🌙⭐🏮)`
-  8. `StickerLayer` → `ColorFilter("Eid Gold")`
-  9. `ColorFilter` → `Preview` → `Export`
-
-### 2️⃣ Holiday Meme _(Comparison Meme)_
-
-- **Nodes Used:** 10 (Multi-branch pipeline)
-- **Flow:**
-  1. `TextPrompt("luxury mudik")` → `PromptEnhancer` → `ImageGenerator(1)`
-  2. `TextPrompt("real mudik")` → `PromptEnhancer` → `ImageGenerator(2)`
-  3. `ImageGenerator(1)` & `ImageGenerator(2)` → `CollageLayout`
-  4. `TextPrompt("Ekspektasi | Realita")` → `TextOverlay`
-  5. `StyleConfig(pop-art)` → `ColorFilter("Dramatic")`
-  6. `CollageLayout` → `TextOverlay` → `ColorFilter`
-  7. `ColorFilter` → `Preview` → `Export`
-
-### 3️⃣ AI Pet → Sticker Pack
-
-- **Nodes Used:** 8 (Output = ready-to-use sticker)
-- **Flow:**
-  1. `TextPrompt("orange tabby, chibi")` & `StyleConfig(cartoon, cute)` → `PromptEnhancer`
-  2. `PromptEnhancer` → `ImageGenerator`
-  3. `ImageGenerator` → `BackgroundRemover`
-  4. `BackgroundRemover` → `FrameBorder("sticker outline")`
-  5. `FrameBorder` → `StickerLayer(✨💖)`
-  6. `StickerLayer` → `Preview` → `Export(png, transparent)`
-
-### 4️⃣ Custom Avatar _(Face-Aware Pipeline)_
-
-- **Nodes Used:** 10
-- **Flow:**
-  1. `ImageUpload(selfie)` → `FaceCrop` → `ImageToText`
-  2. `ImageToText("young woman...")` & `TextPrompt("anime, batik")` → `PromptEnhancer`
-  3. `PromptEnhancer` & `FaceCrop` → `ImageGenerator(img2img)`
-  4. `ImageGenerator` → `BackgroundRemover`
-  5. `BackgroundRemover` → `ImageUpscaler(2x)`
-  6. `ImageUpscaler` → `FrameBorder("neon glow")`
-  7. `FrameBorder` → `Preview` → `Export(png)`
-
----
-
-## 📊 Final Summary
-
-**TOTAL: 22 nodes across 6 categories**
-
-### 📥 INPUT (4)
-
-- TextPrompt
-- ImageUpload
-- TemplatePreset
-- ColorPalette
-
-### ⚙️ TRANSFORM (6)
-
-- PromptEnhancer 🔵
-- StyleConfig
-- ImageToText 🔵
-- TranslateText 🔵
-- BackgroundRmv 🔵
-- FaceCrop 🔵
-
-### 🤖 GENERATE (4)
-
-- ImageGenerator 🔵
-- VideoGenerator 🔵
-- Inpainting 🔵
-- ImageUpscaler 🔵
-
-### 🎨 COMPOSE (5)
-
-- TextOverlay
-- FrameBorder
-- StickerLayer
-- ColorFilter
-- CollageLayout
-
-### 📤 OUTPUT (3)
-
-- Preview
-- Export
-- Watermark
-
-_(🔵 = RUNNABLE)_
+<div class="min-h-screen bg-zinc-950 text-zinc-300 font-sans p-4 md:p-8 lg:p-12 selection:bg-indigo-500/30">
+  <div class="max-w-7xl mx-auto space-y-16">
+
+    <!-- Hero Header -->
+    <header class="relative overflow-hidden rounded-3xl bg-zinc-900 border border-zinc-800 p-8 md:p-12 shadow-2xl shadow-black/50">
+      <div class="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-purple-500/10 pointer-events-none"></div>
+
+      <div class="relative z-10 flex flex-col md:flex-row items-center gap-8">
+        <div class="w-24 h-24 rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25 flex-shrink-0 animate-pulse-slow">
+          <span class="text-5xl">🧩</span>
+        </div>
+        <div class="text-center md:text-left">
+          <h1 class="text-4xl md:text-6xl font-black text-white tracking-tight m-0 mb-4">Node Catalog</h1>
+          <p class="text-xl text-zinc-400">Complete architecture overview of all <strong class="text-zinc-200">22 pipeline nodes</strong>.</p>
+
+          <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mt-6">
+            <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-semibold shadow-inner shadow-blue-500/10">
+              <span class="w-2 h-2 rounded-full bg-blue-500"></span> 10 MVP (Core)
+            </span>
+            <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm font-semibold shadow-inner shadow-emerald-500/10">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 8 MVP+ (Post-launch)
+            </span>
+            <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm font-semibold shadow-inner shadow-amber-500/10">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span> 4 v2 (Power)
+            </span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Node Catalog Overview Grids -->
+    <section>
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-bold text-white flex items-center gap-3">
+          <span class="text-indigo-400 font-emoji">📌</span> Architecture Overview
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 items-start">
+
+        <!-- INPUT -->
+        <div class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 transition-all duration-300">
+          <div class="flex items-center justify-between mb-4 border-b border-zinc-800 pb-3">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2"><span class="font-emoji">📥</span> INPUT</h3>
+            <span class="text-xs font-mono text-zinc-500">4 nodes</span>
+          </div>
+          <div class="space-y-3">
+            <div class="bg-zinc-800/50 border border-zinc-700/50 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-zinc-200">TextPrompt</span>
+                <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 rounded font-bold uppercase">MVP</span>
+              </div>
+              <p class="text-xs text-zinc-400">User text/description</p>
+            </div>
+            <div class="bg-zinc-800/50 border border-zinc-700/50 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-zinc-200">ImageUpload</span>
+                <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 rounded font-bold uppercase">MVP</span>
+              </div>
+              <p class="text-xs text-zinc-400">Upload reference image</p>
+            </div>
+            <div class="bg-zinc-800/50 border border-zinc-700/50 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-zinc-200">TemplatePreset</span>
+                <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 rounded font-bold uppercase">MVP</span>
+              </div>
+              <p class="text-xs text-zinc-400">Pre-made pipeline starter</p>
+            </div>
+            <div class="bg-emerald-900/20 border border-emerald-800/30 p-3 rounded-xl relative overflow-hidden">
+              <div class="absolute top-0 right-0 w-8 h-8 bg-emerald-500/10 rounded-bl-full"></div>
+              <div class="flex justify-between items-start mb-1 relative z-10">
+                <span class="font-semibold text-emerald-200">ColorPalette</span>
+                <div class="flex gap-1">
+                  <span class="text-[10px] bg-indigo-500/20 text-indigo-300 px-1.5 rounded font-bold uppercase">NEW</span>
+                  <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 rounded font-bold uppercase">MVP+</span>
+                </div>
+              </div>
+              <p class="text-xs text-zinc-400 relative z-10">Pick colors & palette</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRANSFORM -->
+        <div class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 transition-all duration-300 xl:col-span-1">
+          <div class="flex items-center justify-between mb-4 border-b border-zinc-800 pb-3">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2"><span class="font-emoji">⚙️</span> TRANSFORM</h3>
+            <span class="text-xs font-mono text-zinc-500">6 nodes</span>
+          </div>
+          <div class="space-y-3">
+            <div class="bg-zinc-800/50 border border-zinc-700/50 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-zinc-200">PromptEnhancer</span>
+                <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 rounded font-bold uppercase">MVP</span>
+              </div>
+              <p class="text-xs text-zinc-400">Raw text → AI (Qwen)</p>
+            </div>
+            <div class="bg-zinc-800/50 border border-zinc-700/50 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-zinc-200">StyleConfig</span>
+                <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 rounded font-bold uppercase">MVP</span>
+              </div>
+              <p class="text-xs text-zinc-400">Art style + mood config</p>
+            </div>
+            <div class="bg-emerald-900/20 border border-emerald-800/30 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-emerald-200">ImageToText</span>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 rounded font-bold uppercase">MVP+</span>
+              </div>
+              <p class="text-xs text-zinc-400">Describe img → text</p>
+            </div>
+            <div class="bg-emerald-900/20 border border-emerald-800/30 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-emerald-200">TranslateText</span>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 rounded font-bold uppercase">MVP+</span>
+              </div>
+              <p class="text-xs text-zinc-400">Translate langs (Qwen)</p>
+            </div>
+            <div class="bg-emerald-900/20 border border-emerald-800/30 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-emerald-200 flex items-center gap-1">BackgroundRmv</span>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 rounded font-bold uppercase">MVP+</span>
+              </div>
+              <p class="text-xs text-zinc-400">Remove bg</p>
+            </div>
+            <div class="bg-amber-900/20 border border-amber-800/30 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-amber-200">FaceCrop</span>
+                <span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 rounded font-bold uppercase">V2</span>
+              </div>
+              <p class="text-xs text-zinc-400">Detect & extract face</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- GENERATE -->
+        <div class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 transition-all duration-300 xl:col-span-1">
+          <div class="flex items-center justify-between mb-4 border-b border-zinc-800 pb-3">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2"><span class="font-emoji">🤖</span> GENERATE</h3>
+            <span class="text-xs font-mono text-zinc-500">4 nodes</span>
+          </div>
+          <div class="space-y-3">
+            <div class="bg-zinc-800/50 border border-zinc-700/50 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-zinc-200">ImageGen</span>
+                <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 rounded font-bold uppercase">MVP</span>
+              </div>
+              <p class="text-xs text-zinc-400">img / img2img (Wan)</p>
+            </div>
+            <div class="bg-zinc-800/50 border border-zinc-700/50 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-zinc-200">VideoGen</span>
+                <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 rounded font-bold uppercase">MVP</span>
+              </div>
+              <p class="text-xs text-zinc-400">vid / img2vid (Wan)</p>
+            </div>
+            <div class="bg-emerald-900/20 border border-emerald-800/30 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-emerald-200">Inpainting</span>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 rounded font-bold uppercase">MVP+</span>
+              </div>
+              <p class="text-xs text-zinc-400">Edit masked region</p>
+            </div>
+            <div class="bg-emerald-900/20 border border-emerald-800/30 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-emerald-200">ImageUpscaler</span>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 rounded font-bold uppercase">MVP+</span>
+              </div>
+              <p class="text-xs text-zinc-400">Upscale resolution to HD</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- COMPOSE -->
+        <div class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 transition-all duration-300 xl:col-span-1">
+          <div class="flex items-center justify-between mb-4 border-b border-zinc-800 pb-3">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2"><span class="font-emoji">🎨</span> COMPOSE</h3>
+            <span class="text-xs font-mono text-zinc-500">5 nodes</span>
+          </div>
+          <div class="space-y-3">
+            <div class="bg-zinc-800/50 border border-zinc-700/50 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-zinc-200">TextOverlay</span>
+                <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 rounded font-bold uppercase">MVP</span>
+              </div>
+              <p class="text-xs text-zinc-400">Text on image (Client)</p>
+            </div>
+            <div class="bg-emerald-900/20 border border-emerald-800/30 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-emerald-200">FrameBorder</span>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 rounded font-bold uppercase">MVP+</span>
+              </div>
+              <p class="text-xs text-zinc-400">Decorative frames</p>
+            </div>
+            <div class="bg-emerald-900/20 border border-emerald-800/30 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-emerald-200">StickerLayer</span>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 rounded font-bold uppercase">MVP+</span>
+              </div>
+              <p class="text-xs text-zinc-400">Emoji/sticker overlay</p>
+            </div>
+            <div class="bg-emerald-900/20 border border-emerald-800/30 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-emerald-200">ColorFilter</span>
+                <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 rounded font-bold uppercase">MVP+</span>
+              </div>
+              <p class="text-xs text-zinc-400">Color grading & filters</p>
+            </div>
+            <div class="bg-amber-900/20 border border-amber-800/30 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-amber-200">CollageLayout</span>
+                <span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 rounded font-bold uppercase">V2</span>
+              </div>
+              <p class="text-xs text-zinc-400">Multi-image layout</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- OUTPUT -->
+        <div class="bg-zinc-900/50 border border-zinc-800 rounded-2xl p-5 hover:border-zinc-700 transition-all duration-300 xl:col-span-1">
+          <div class="flex items-center justify-between mb-4 border-b border-zinc-800 pb-3">
+            <h3 class="text-lg font-bold text-white flex items-center gap-2"><span class="font-emoji">📤</span> OUTPUT</h3>
+            <span class="text-xs font-mono text-zinc-500">3 nodes</span>
+          </div>
+          <div class="space-y-3">
+            <div class="bg-zinc-800/50 border border-zinc-700/50 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-zinc-200">Preview</span>
+                <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 rounded font-bold uppercase">MVP</span>
+              </div>
+              <p class="text-xs text-zinc-400">Realtime canvas preview</p>
+            </div>
+            <div class="bg-zinc-800/50 border border-zinc-700/50 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-zinc-200">Export</span>
+                <span class="text-[10px] bg-blue-500/20 text-blue-300 px-1.5 rounded font-bold uppercase">MVP</span>
+              </div>
+              <p class="text-xs text-zinc-400">Download & Share</p>
+            </div>
+            <div class="bg-amber-900/20 border border-amber-800/30 p-3 rounded-xl">
+              <div class="flex justify-between items-start mb-1">
+                <span class="font-semibold text-amber-200">Watermark</span>
+                <span class="text-[10px] bg-amber-500/20 text-amber-300 px-1.5 rounded font-bold uppercase">V2</span>
+              </div>
+              <p class="text-xs text-zinc-400">Brand/attribution stamp</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Deep Dives -->
+    <section>
+      <h2 class="text-3xl font-bold text-white mb-8 flex items-center gap-3">
+        <span class="text-orange-500 font-emoji">🔥</span> Node Deep-Dives
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!-- Card: ColorPalette -->
+        <article class="bg-[#18181b] border border-[#27272a] hover:border-indigo-500/50 rounded-2xl p-6 transition-all shadow-lg hover:shadow-indigo-500/10">
+          <div class="flex items-center justify-between mb-4 pb-4 border-b border-[#27272a]">
+            <div>
+              <h3 class="text-xl font-bold text-white flex items-center gap-2"><span class="font-emoji">🎨</span> ColorPalette</h3>
+              <p class="text-sm text-zinc-400 mt-1">Category: <code class="bg-[#27272a] text-pink-400 px-1.5 py-0.5 rounded text-xs ml-1">input</code></p>
+            </div>
+            <div class="text-right">
+               <span class="text-xs font-semibold bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded-full border border-emerald-500/20">MVP+</span>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Kenapa Perlu?</h4>
+              <p class="text-sm text-zinc-300 leading-relaxed">
+                Standalone node yang bikin user bisa reuse palette across branches, feed palette ke <b class="text-zinc-100">PromptEnhancer</b>, atau sync warnanya ke FrameBorder & TextOverlay.
+              </p>
+            </div>
+
+            <div class="bg-[#09090b] rounded-xl p-4 border border-[#27272a]">
+              <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Config Mode</h4>
+              <ul class="text-sm text-zinc-300 space-y-2 mt-2">
+                <li class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-indigo-500"></div> <code class="text-indigo-300">preset</code> (Ramadan, Lebaran, pastel, dll)</li>
+                <li class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-pink-500"></div> <code class="text-pink-300">custom</code> (User pick via color picker)</li>
+                <li class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> <code class="text-emerald-300">extract</code> (Auto-extract from connected img)</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card: ImageToText -->
+        <article class="bg-[#18181b] border border-[#27272a] hover:border-indigo-500/50 rounded-2xl p-6 transition-all shadow-lg hover:shadow-indigo-500/10 relative overflow-hidden">
+          <div class="absolute -right-10 -top-10 text-8xl opacity-5 font-emoji">👁️</div>
+          <div class="flex items-center justify-between mb-4 pb-4 border-b border-[#27272a] relative z-10">
+            <div>
+              <h3 class="text-xl font-bold text-white flex items-center gap-2"><span class="font-emoji">👁️</span> ImageToText</h3>
+              <p class="text-sm text-zinc-400 mt-1 flex items-center gap-2">
+                Category: <code class="bg-[#27272a] text-pink-400 px-1.5 py-0.5 rounded text-xs">transform</code>
+                <span class="flex items-center gap-1 text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Runnable</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-4 relative z-10">
+            <div>
+              <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Kenapa Perlu?</h4>
+              <p class="text-sm text-zinc-300 leading-relaxed">
+                Bridge antara image input dan text pipeline. Biasa dipakai untuk <b>Image → AI Description → Enhancer → Styled Image</b>.
+              </p>
+            </div>
+
+            <div class="bg-[#09090b] rounded-xl p-4 border border-[#27272a]">
+              <div class="text-xs font-mono text-emerald-400 bg-emerald-500/10 p-3 rounded-lg border border-emerald-500/20 overflow-x-auto whitespace-nowrap scrollbar-hide">
+                ImageUpload → ImageToText → Enhancer → Generator
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card: BackgroundRemover -->
+        <article class="bg-[#18181b] border border-[#27272a] hover:border-indigo-500/50 rounded-2xl p-6 transition-all shadow-lg hover:shadow-indigo-500/10 relative overflow-hidden">
+          <div class="flex items-center justify-between mb-4 pb-4 border-b border-[#27272a]">
+            <div>
+              <h3 class="text-xl font-bold text-white flex items-center gap-2"><span class="font-emoji">✂️</span> BackgroundRemover</h3>
+              <p class="text-sm text-zinc-400 mt-1 flex items-center gap-2">
+                Category: <code class="bg-[#27272a] text-pink-400 px-1.5 py-0.5 rounded text-xs">transform</code>
+                <span class="flex items-center gap-1 text-xs text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/20"><span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span> Runnable</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <div>
+              <h4 class="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2">Kenapa Perlu?</h4>
+              <p class="text-sm text-zinc-300 leading-relaxed">
+                Fundamental untuk workflow Avatar, Sticker creation, atau Meme generator. Mengextract subject secara otomatis untuk diletakkan di atas kanvas/bg lain.
+              </p>
+            </div>
+
+            <div class="bg-[#09090b] rounded-xl p-4 border border-[#27272a] grid grid-cols-2 gap-4">
+               <div>
+                 <h4 class="text-[10px] text-zinc-500 mb-2 uppercase font-bold tracking-wider">Avatar Pipeline</h4>
+                 <div class="flex flex-col gap-1 text-xs font-mono text-zinc-400">
+                    <span class="bg-zinc-800 px-2 py-1 rounded inline-block w-fit">Upload</span>
+                    <span class="text-zinc-600 pl-2">↳ <span class="bg-zinc-800 px-2 py-1 rounded text-emerald-400">BgRemove</span></span>
+                    <span class="text-zinc-600 pl-6">↳ <span class="bg-zinc-800 px-2 py-1 rounded">TextToImg</span></span>
+                 </div>
+               </div>
+               <div>
+                 <h4 class="text-[10px] text-zinc-500 mb-2 uppercase font-bold tracking-wider">Sticker Pipeline</h4>
+                 <div class="flex flex-col gap-1 text-xs font-mono text-zinc-400">
+                    <span class="bg-zinc-800 px-2 py-1 rounded inline-block w-fit">ImageGen</span>
+                    <span class="text-zinc-600 pl-2">↳ <span class="bg-zinc-800 px-2 py-1 rounded text-emerald-400">BgRemove</span></span>
+                    <span class="text-zinc-600 pl-6">↳ <span class="bg-zinc-800 px-2 py-1 rounded">FrameBorder</span></span>
+                 </div>
+               </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Card: UI Finishers -->
+        <article class="bg-gradient-to-br from-[#18181b] to-[#09090b] border border-[#27272a] hover:border-pink-500/50 rounded-2xl p-6 transition-all shadow-lg hover:shadow-pink-500/10">
+          <div class="flex items-center justify-between mb-4 pb-4 border-b border-[#27272a]">
+            <div>
+              <h3 class="text-xl font-bold text-white flex items-center gap-2 text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-amber-400">🎨 UI Finishing Nodes</h3>
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <p class="text-sm text-zinc-300">
+              Content greeting/wishes <strong class="text-pink-400">BUTUH</strong> frame & sticker. Ini pembeda utama antara "gambar AI mentah" vs "konten siap share".
+            </p>
+
+            <div class="flex flex-col gap-3 mt-4">
+              <div class="flex items-center gap-4 bg-zinc-950/50 p-3 rounded-xl border border-zinc-800/50 transition duration-300 hover:bg-zinc-900 overflow-hidden">
+                 <div class="w-10 h-10 rounded-lg bg-pink-500/20 text-xl flex items-center justify-center shrink-0 shadow-inner shadow-pink-500/20 border border-pink-500/20"><span class="font-emoji">🖼️</span></div>
+                 <div>
+                   <h4 class="text-sm font-bold text-zinc-200">FrameBorder</h4>
+                   <p class="text-[11px] text-zinc-500 mt-0.5 truncate">Islamic, Floral, Polaroid, Neon, Torn-paper</p>
+                 </div>
+              </div>
+              <div class="flex items-center gap-4 bg-zinc-950/50 p-3 rounded-xl border border-zinc-800/50 transition duration-300 hover:bg-zinc-900 overflow-hidden">
+                 <div class="w-10 h-10 rounded-lg bg-amber-500/20 text-xl flex items-center justify-center shrink-0 shadow-inner shadow-amber-500/20 border border-amber-500/20"><span class="font-emoji">⭐</span></div>
+                 <div>
+                   <h4 class="text-sm font-bold text-zinc-200">StickerLayer</h4>
+                   <p class="text-[11px] text-zinc-500 mt-0.5 truncate">Emoji packs (Ramadan, Meme, Sparkles)</p>
+                 </div>
+              </div>
+              <div class="flex items-center gap-4 bg-zinc-950/50 p-3 rounded-xl border border-zinc-800/50 transition duration-300 hover:bg-zinc-900 overflow-hidden">
+                 <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-xl flex items-center justify-center shrink-0 shadow-inner shadow-emerald-500/20 border border-emerald-500/20"><span class="font-emoji">🌈</span></div>
+                 <div>
+                   <h4 class="text-sm font-bold text-zinc-200">ColorFilter</h4>
+                   <p class="text-[11px] text-zinc-500 mt-0.5 truncate">Presets: Warm, Vintage, Eid Gold, Sahur</p>
+                 </div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- Workflows -->
+    <section class="pb-16">
+      <h2 class="text-3xl font-bold text-white mb-8 flex items-center gap-3">
+        <span class="text-rose-400 font-emoji">🎯</span> Workflow Pipelines
+      </h2>
+
+      <div class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-2xl">
+
+        <div class="p-6 md:p-8 border-b border-zinc-800">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="w-8 h-8 rounded-full bg-rose-500/20 border border-rose-500/30 text-rose-400 flex items-center justify-center font-bold font-mono">1</span>
+            <h3 class="text-xl font-bold text-white">Ramadan Wishes</h3>
+            <span class="text-[10px] font-bold tracking-wider uppercase bg-zinc-800 text-zinc-400 px-2 py-1 rounded">Advanced</span>
+          </div>
+          <p class="text-zinc-400 text-sm mb-6 max-w-2xl">Pipeline berukuran 11 node untuk menghasilkan kartu ucapan Ramadan yang rich-text, dengan arabic overlay, custom palette, islamic borders, dan color grading.</p>
+
+          <div class="overflow-x-auto pb-4 scrollbar-hide">
+            <div class="flex gap-2 items-center text-sm font-mono whitespace-nowrap min-w-max bg-[#09090b] p-4 rounded-xl border border-zinc-800">
+              <span class="px-3 py-1.5 border border-zinc-700 rounded bg-zinc-800 text-zinc-300 shadow-sm">TextPrompt</span>
+              <span class="text-zinc-600">→</span>
+              <span class="px-3 py-1.5 border border-blue-500/30 rounded bg-blue-500/10 text-blue-300 font-bold shadow-[0_0_10px_rgba(59,130,246,0.1)]">ImageGen</span>
+              <span class="text-zinc-600">→</span>
+              <span class="px-3 py-1.5 border border-pink-500/30 rounded bg-pink-500/10 text-pink-300">FrameBorder</span>
+              <span class="text-zinc-600">→</span>
+              <span class="px-3 py-1.5 border border-amber-500/30 rounded bg-amber-500/10 text-amber-300">StickerLayer</span>
+              <span class="text-zinc-600">→</span>
+              <span class="px-3 py-1.5 border border-emerald-500/30 rounded bg-emerald-500/10 text-emerald-300">ColorFilter</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-6 md:p-8 bg-zinc-900/50">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="w-8 h-8 rounded-full bg-indigo-500/20 border border-indigo-500/30 text-indigo-400 flex items-center justify-center font-bold font-mono">2</span>
+            <h3 class="text-xl font-bold text-white">Holiday Meme (Comparison)</h3>
+            <span class="text-[10px] font-bold tracking-wider uppercase bg-zinc-800 text-zinc-400 px-2 py-1 rounded">Multi-branch</span>
+          </div>
+          <p class="text-zinc-400 text-sm mb-6 max-w-2xl">Memanfaatkan <code class="text-indigo-400 bg-indigo-500/10 px-1 py-0.5 rounded">CollageLayout</code> untuk menyatukan dua generasi gambar secara parallel ("Expectation" vs "Reality") dalam satu kanvas.</p>
+
+          <div class="overflow-x-auto pb-4 scrollbar-hide">
+            <div class="flex gap-4 items-center text-sm font-mono whitespace-nowrap min-w-max bg-[#09090b] p-5 rounded-xl border border-zinc-800">
+              <div class="flex flex-col gap-3">
+                 <span class="px-3 py-1.5 border border-zinc-700 rounded bg-zinc-800 text-zinc-300 shadow-sm">ImgGen(Luxury)</span>
+                 <span class="px-3 py-1.5 border border-zinc-700 rounded bg-zinc-800 text-zinc-300 shadow-sm">ImgGen(Macet)</span>
+              </div>
+              <div class="flex flex-col items-center justify-center mx-2 max-w-[20px]">
+                <div class="w-px h-6 bg-zinc-700 rotate-[30deg] translate-y-1"></div>
+                <span class="text-indigo-500 font-bold ml-1">→</span>
+                <div class="w-px h-6 bg-zinc-700 -rotate-[30deg] -translate-y-1"></div>
+              </div>
+              <span class="px-3 py-1.5 border border-indigo-500/30 rounded bg-indigo-500/10 text-indigo-300 font-bold shadow-[0_0_15px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500/50">CollageLayout</span>
+              <span class="text-zinc-600">→</span>
+              <span class="px-3 py-1.5 border border-pink-500/30 rounded bg-pink-500/10 text-pink-300">TextOverlay</span>
+              <span class="text-zinc-600">→</span>
+              <span class="px-3 py-1.5 border border-emerald-500/30 rounded bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 cursor-pointer transition-colors">Export Node</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <div class="text-center pb-24 border-t border-zinc-800 pt-8 flex items-center justify-between">
+      <p class="text-sm text-zinc-500">© 2026 Penginfo Handal &bull; Node Architecture Sandbox</p>
+      <div class="flex gap-2">
+         <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+         <span class="w-2 h-2 rounded-full bg-pink-500"></span>
+         <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+      </div>
+    </div>
+
+  </div>
+</div>
