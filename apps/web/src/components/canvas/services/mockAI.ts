@@ -1,146 +1,83 @@
 // Mock AI service for generating placeholder content
+// Used as fallback when server/API key is not available
+
+import type { NodeOutput } from '../types/port-types';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Sample punchlines for different humor styles
-const SAMPLE_PUNCHLINES = {
-  receh: [
-    'Kenapa THR selalu datang telat? Karena dia suka ngaret kayak mantan.',
-    'Mudik itu seperti diet, baru mulai udah pengen nyerah.',
-    'Sahur is temporary, ngantuk is eternal.',
-    'Lebaran tanpa amplop itu seperti wifi tanpa password - sedih.',
-    'Puasa tanpa takjil itu seperti stand-up tanpa punchline.',
+const ENHANCED_PROMPTS: Record<string, string[]> = {
+  wishes: [
+    'A serene Ramadan night scene with golden crescent moon over a mosque, intricate Islamic geometric patterns in the sky, warm lantern light, greeting card composition, elegant Arabic calligraphy border',
+    'Beautiful Eid Mubarak celebration scene, joyful family gathering, traditional Indonesian batik elements, warm golden lighting, festive atmosphere, photorealistic rendering',
   ],
-  satir: [
-    'THR: Tunjangan Hari Raya atau Terjebak Hutang Riba?',
-    'Mudik gratis, tapi bayar pakai mental.',
-    'Sahur jam 3 pagi, meeting jam 8. Produktivitas Indonesia.',
-    'Lebaran: Saat tante-tante jadi auditor kehidupanmu.',
-    'Puasa 30 hari, drama keluarga 365 hari.',
+  meme: [
+    'Expressive cartoon character with exaggerated surprised face, holding an empty wallet, Indonesian street food stall background, vibrant pop art colors, comic book style',
+    'Funny illustration of a person sleeping through sahur alarm, comedic facial expression, bedroom scene with multiple alarm clocks, bright colorful cartoon style',
   ],
-  relatable: [
-    'THR belum cair, wish list udah sepanjang jalan tol.',
-    'Mudik level expert: Tidur di rest area lebih nyaman dari rumah.',
-    'Alarm sahur bunyi, tapi tubuh memilih untuk bertahan.',
-    'Ketemu saudara pas lebaran: "Kapan nikah?" The Sequel.',
-    'Puasa lancar, iman kuat, WiFi lemot.',
+  character: [
+    'Adorable fantasy cat creature with butterfly wings, soft pastel watercolor style, big sparkling eyes, fluffy fur with rainbow highlights, magical forest background, kawaii aesthetic',
+    'Cute baby dragon character with tiny wings, sitting on a cloud, wearing a small crown, soft gradient colors, chibi art style, adorable expression',
   ],
-  dark: [
-    'THR is just a trailer for the annual family financial audit.',
-    'Mudik: A survival game where the boss is your relatives.',
-    'Sahur at 3am hits different when you question your life choices.',
-    'Lebaran: The annual reminder that youre still single.',
-    'Puasa teaches patience. Traffic teaches rage. Balance.',
+  avatar: [
+    'Anime-style portrait, detailed eyes with light reflection, soft shading, clean linework, pastel color palette, slight smile, flowing hair, studio Ghibli inspired',
+    'Modern digital avatar, stylized proportions, vibrant neon accents, clean vector art style, confident expression, trendy hairstyle',
   ],
-  absurd: [
-    'THR itu sebenarnya singkatan dari Tikus Hujan Rebahan.',
-    'Mudik dengan kambing lebih seru karena kambing ga nanya kapan nikah.',
-    'Sahur is just breakfast cosplaying as dinner.',
-    'Lebaran itu seperti Netflix, ada loading time yang gak perlu.',
-    'Puasa membuat kita sadar bahwa perut bisa berbicara.',
+  general: [
+    'High quality digital artwork, detailed composition, professional lighting, vibrant colors, trending on artstation, masterpiece quality',
+    'Beautiful scenic illustration, atmospheric lighting, rich details, cinematic composition, concept art quality',
   ],
 };
-
-const GENERIC_OUTPUTS = [
-  'This is a mock generated output. Replace with real AI in production.',
-  'Sample content generated for testing purposes.',
-  'Placeholder text that simulates AI generation.',
-  'Demo output - integrate with your preferred AI service.',
-  'Mock result - your actual content will appear here.',
-];
 
 export const mockAI = {
   /**
-   * Generate text outputs based on prompt
+   * Mock prompt enhancement (simulates Qwen)
    */
-  generateText: async (prompt: string, count: number): Promise<string[]> => {
-    await delay(800 + Math.random() * 400); // Simulate API latency
-
-    // Detect humor style from prompt or use generic
-    const style = detectHumorStyle(prompt);
-    const punchlines = style ? SAMPLE_PUNCHLINES[style] : GENERIC_OUTPUTS;
-
-    // Generate requested number of outputs
-    return Array.from({ length: count }, (_, i) => {
-      const index = (i + Math.floor(Math.random() * 3)) % punchlines.length;
-      return punchlines[index];
-    });
-  },
-
-  /**
-   * Generate variant batches
-   */
-  generateVariants: async <T>(input: T, count: number, randomize: boolean): Promise<T[]> => {
-    await delay(300 + Math.random() * 200);
-
-    const variants = Array.from({ length: count }, () => ({
-      ...input,
-      _variantId: Math.random().toString(36).slice(2, 8),
-    }));
-
-    if (randomize) {
-      return shuffleArray(variants) as T[];
-    }
-
-    return variants as T[];
-  },
-
-  /**
-   * Simulate image generation (returns placeholder)
-   */
-  generateImage: async (_prompt: string): Promise<string> => {
-    await delay(1500 + Math.random() * 500);
-
-    // Return a placeholder image URL
-    const width = 400;
-    const height = 400;
-    return `https://via.placeholder.com/${width}x${height}/1e1e2e/ffffff?text=AI+Generated`;
-  },
-
-  /**
-   * Simulate export process
-   */
-  exportContent: async (
-    format: string,
-    quality: number,
-  ): Promise<{ url: string; size: string }> => {
-    await delay(1000 + Math.random() * 500);
-
-    const mockId = Math.random().toString(36).slice(2, 10);
+  enhancePrompt: async (text: string, contentType: string): Promise<NodeOutput> => {
+    await delay(600 + Math.random() * 400);
+    const prompts = ENHANCED_PROMPTS[contentType] || ENHANCED_PROMPTS.general;
+    const prompt = prompts[Math.floor(Math.random() * prompts.length)];
     return {
-      url: `https://share.example.com/export/${mockId}.${format}`,
-      size: `${Math.floor(100 + quality * 20)}KB`,
+      type: 'prompt',
+      data: {
+        prompt: `${prompt}. Based on: ${text.slice(0, 50)}`,
+        negativePrompt: 'low quality, blurry, text',
+      },
+      timestamp: Date.now(),
+    };
+  },
+
+  /**
+   * Mock image generation (simulates Wan)
+   */
+  generateImage: async (_prompt: string, dimensions: string): Promise<NodeOutput> => {
+    await delay(1500 + Math.random() * 500);
+    const [w, h] = (dimensions || '1024*1024').split('*').map(Number);
+    return {
+      type: 'image',
+      data: {
+        url: `https://via.placeholder.com/${w || 1024}x${h || 1024}/1e1e2e/4ade80?text=AI+Generated`,
+        width: w || 1024,
+        height: h || 1024,
+      },
+      timestamp: Date.now(),
+    };
+  },
+
+  /**
+   * Mock video generation (simulates Wan)
+   */
+  generateVideo: async (_prompt: string, duration: string): Promise<NodeOutput> => {
+    await delay(2000 + Math.random() * 1000);
+    const dur = parseInt(duration) || 5;
+    return {
+      type: 'video',
+      data: {
+        url: 'https://via.placeholder.com/1280x720/1e1e2e/f472b6?text=AI+Video',
+        duration: dur,
+        width: 1280,
+        height: 720,
+      },
+      timestamp: Date.now(),
     };
   },
 };
-
-// Helper functions
-function detectHumorStyle(prompt: string): keyof typeof SAMPLE_PUNCHLINES | null {
-  const lowerPrompt = prompt.toLowerCase();
-
-  if (lowerPrompt.includes('receh') || lowerPrompt.includes('jayus')) return 'receh';
-  if (lowerPrompt.includes('satir') || lowerPrompt.includes('sarkastik')) return 'satir';
-  if (lowerPrompt.includes('relatable') || lowerPrompt.includes('relate')) return 'relatable';
-  if (lowerPrompt.includes('dark') || lowerPrompt.includes('gelap')) return 'dark';
-  if (lowerPrompt.includes('absurd') || lowerPrompt.includes('random')) return 'absurd';
-
-  // Default to receh if Indonesian context detected
-  if (
-    lowerPrompt.includes('thr') ||
-    lowerPrompt.includes('mudik') ||
-    lowerPrompt.includes('lebaran')
-  ) {
-    return 'receh';
-  }
-
-  return null;
-}
-
-function shuffleArray<T>(array: T[]): T[] {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}

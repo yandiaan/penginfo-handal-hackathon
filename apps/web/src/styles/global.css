@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
   --color-primary: #fe733a;
@@ -8,10 +8,9 @@
 @layer base {
   body {
     @apply bg-background text-white;
-
   }
 
-.react-flow__attribution {
+  .react-flow__attribution {
     display: none !important;
-}
+  }
 }
