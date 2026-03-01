@@ -3,11 +3,12 @@
 @theme {
   --color-primary: #fe733a;
   --color-background: #121212;
+  --font-family-roboto: 'Roboto', sans-serif;
 }
 
 @layer base {
   body {
-    @apply bg-background text-white;
+    @apply bg-background text-white font-roboto;
   }
 
   .react-flow__attribution {
