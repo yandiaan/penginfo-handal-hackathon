@@ -8,7 +8,8 @@
 
 @layer base {
   body {
-    @apply bg-background text-white font-roboto;
+    @apply bg-background text-white;
+    font-family: 'Roboto', sans-serif;
   }
 
   .react-flow__attribution {
