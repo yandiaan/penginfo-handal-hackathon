@@ -8,7 +8,7 @@ export function StyleConfigNode({ data, selected }: NodeProps<StyleConfigData>) 
   return (
     <CompactNode
       nodeType="styleConfig"
-      icon="🎭"
+      icon=""
       title={data.label}
       subtitle={`${config.artStyle} · ${config.mood}`}
       selected={selected}

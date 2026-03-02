@@ -13,7 +13,7 @@ export function TextOverlayNode({ data, selected }: NodeProps<TextOverlayData>) 
   return (
     <CompactNode
       nodeType="textOverlay"
-      icon="🔤"
+      icon=""
       title={data.label}
       subtitle={`${config.position} · ${config.font}`}
       selected={selected}

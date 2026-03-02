@@ -1,4 +1,5 @@
 import type { NodeProps } from '@xyflow/react';
+import { Zap } from 'lucide-react';
 import { CompactNode } from '../CompactNode';
 import type { ImageGeneratorData } from '../../types/node-types';
 
@@ -16,13 +17,15 @@ export function ImageGeneratorNode({ data, selected }: NodeProps<ImageGeneratorD
   return (
     <CompactNode
       nodeType="imageGenerator"
-      icon="🖌️"
+      icon=""
       title={data.label}
       subtitle={`${config.mode} · ${dimLabel}`}
       selected={selected}
     >
       <div className="flex items-center gap-1.5 text-[11px] text-white/50">
-        <span className="text-white/30">🚀 Wan · {config.steps} steps</span>
+        <span className="inline-flex items-center gap-1.5 text-white/30">
+          <Zap size={12} className="text-white/35" /> Wan · {config.steps} steps
+        </span>
       </div>
     </CompactNode>
   );

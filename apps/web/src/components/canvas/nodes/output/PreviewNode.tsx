@@ -8,7 +8,7 @@ export function PreviewNode({ data, selected }: NodeProps<PreviewData>) {
   return (
     <CompactNode
       nodeType="preview"
-      icon="👁️"
+      icon=""
       title={data.label}
       subtitle={`${config.preset} · ${config.width}×${config.height}`}
       selected={selected}
