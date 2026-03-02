@@ -123,7 +123,9 @@ export function FlowToolbar({
         toggleMenu();
       }
     };
+
     window.addEventListener('keydown', handleKeyDown);
+
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [menuMounted, menuOpen]);
 
