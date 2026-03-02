@@ -1,5 +1,7 @@
 import { Handle, Position, useNodeId } from '@xyflow/react';
 import type { ReactNode } from 'react';
+import { Check, CircleDot, RotateCw, X } from 'lucide-react';
+import { renderNodeTypeIcon } from '../icons/nodeTypeIcon';
 import { getCategoryForNodeType } from '../config/nodeCategories';
 import { PORT_COLORS } from '../config/port-colors';
 import { NODE_PORT_SCHEMAS } from '../types/node-types';
@@ -26,14 +28,18 @@ const STATUS_COLORS: Record<NodeExecutionStatus, { border: string; glow: string;
   stale: { border: '#fb923c', glow: '#fb923c40', bg: '#fb923c15' },
 };
 
-const STATUS_ICONS: Record<NodeExecutionStatus, string | null> = {
+const STATUS_GLYPHS: Record<NodeExecutionStatus, ReactNode | null> = {
   idle: null,
-  ready: '◉',
+  ready: <CircleDot size={12} />,
   running: null, // uses animated spinner
-  done: '✓',
-  error: '✕',
-  stale: '↻',
+  done: <Check size={12} />,
+  error: <X size={12} />,
+  stale: <RotateCw size={12} />,
 };
+
+function renderFallbackIcon(fallbackIcon?: string): ReactNode {
+  return <span className="text-[18px] leading-none">{fallbackIcon}</span>;
+}
 
 export function CompactNode({
   nodeType,
@@ -57,16 +63,31 @@ export function CompactNode({
 
   return (
     <div
-      className={`min-w-[180px] max-w-[220px] bg-[#1e1e2e] rounded-xl overflow-visible font-[Inter,system-ui,sans-serif] cursor-pointer transition-[border-color,box-shadow] duration-200 relative${isRunning ? ' animate-pulse' : ''}`}
+      className={`min-w-[180px] max-w-[220px] rounded-xl overflow-visible font-[Inter,system-ui,sans-serif] cursor-pointer relative motion-lift motion-press transition-[border-color,box-shadow,transform] duration-200${
+        isRunning ? ' animate-pulse' : ''
+      }`}
       style={{
+        background: 'var(--color-surface-node)',
         border: `2px solid ${selected ? category.color : hasStatus ? colors.border : category.borderColor}`,
         boxShadow: hasStatus
-          ? `0 0 0 3px ${colors.glow}, 0 4px 20px rgba(0, 0, 0, 0.3)`
+          ? `0 0 0 3px ${colors.glow}, 0 10px 30px rgba(0, 0, 0, 0.38)`
           : selected
-            ? `0 0 0 2px ${category.color}40, 0 4px 20px rgba(0, 0, 0, 0.3)`
-            : `0 4px 20px rgba(0, 0, 0, 0.3)`,
+            ? `0 0 0 2px ${category.color}40, 0 10px 30px rgba(0, 0, 0, 0.38)`
+            : `0 10px 30px rgba(0, 0, 0, 0.34)`,
       }}
     >
+      {/* Selected ring (brand orange) — presentational only */}
+      {selected && (
+        <span
+          className="pointer-events-none absolute -inset-1 rounded-[14px] opacity-60 motion-safe:[animation:glowPulse_2.2s_var(--motion-ease-inout)_infinite] motion-reduce:[animation:none]"
+          style={{
+            border: '1px solid var(--editor-accent-45)',
+            boxShadow: '0 0 0 1px var(--editor-accent-25), 0 0 26px var(--editor-accent-16)',
+            opacity: hasStatus ? 0.35 : 0.6,
+          }}
+        />
+      )}
+
       {/* Status badge — n8n-style indicator */}
       {hasStatus && (
         <div
@@ -93,7 +114,7 @@ export function CompactNode({
               <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
             </svg>
           ) : (
-            STATUS_ICONS[status]
+            STATUS_GLYPHS[status]
           )}
         </div>
       )}
@@ -105,7 +126,7 @@ export function CompactNode({
           id={port.id}
           type="target"
           position={Position.Left}
-          className="!w-3 !h-3 !bg-[#1e1e2e]"
+          className="!w-3 !h-3 !bg-[var(--color-surface-node)]"
           style={{
             border: `2px solid ${PORT_COLORS[port.type]}`,
             top: `${getHandlePosition(index, schema.inputs.length)}%`,
@@ -119,7 +140,9 @@ export function CompactNode({
         className="flex items-center gap-2.5 px-4 py-3.5"
         style={{ backgroundColor: category.bgColor }}
       >
-        <span className="text-xl">{icon}</span>
+        <span className="grid place-items-center w-8 h-8 rounded-lg bg-white/5 border border-white/10">
+          {renderNodeTypeIcon(nodeType) ?? renderFallbackIcon(icon)}
+        </span>
         <div className="flex-1 min-w-0">
           <div
             className="text-sm font-semibold tracking-[0.2px] whitespace-nowrap overflow-hidden text-ellipsis"
@@ -174,7 +197,9 @@ export function CompactNode({
           )}
           {isDone && (
             <>
-              <span style={{ color: colors.border }}>✓ Done</span>
+              <span className="inline-flex items-center gap-1.5" style={{ color: colors.border }}>
+                <Check size={12} /> Done
+              </span>
               {execState?.lastRunAt && (
                 <span className="text-white/30 ml-auto">
                   {formatTimestamp(execState.lastRunAt)}
@@ -184,18 +209,22 @@ export function CompactNode({
           )}
           {isError && (
             <span
-              className="truncate"
+              className="truncate inline-flex items-center gap-1.5"
               style={{ color: colors.border }}
               title={execState?.error || 'Unknown error'}
             >
-              ✕ {execState?.error || 'Failed'}
+              <X size={12} /> {execState?.error || 'Failed'}
             </span>
           )}
           {status === 'stale' && (
-            <span style={{ color: colors.border }}>↻ Needs re-run</span>
+            <span className="inline-flex items-center gap-1.5" style={{ color: colors.border }}>
+              <RotateCw size={12} /> Needs re-run
+            </span>
           )}
           {status === 'ready' && (
-            <span style={{ color: colors.border }}>◉ Ready</span>
+            <span className="inline-flex items-center gap-1.5" style={{ color: colors.border }}>
+              <CircleDot size={12} /> Ready
+            </span>
           )}
         </div>
       )}
@@ -207,7 +236,7 @@ export function CompactNode({
           id={port.id}
           type="source"
           position={Position.Right}
-          className="!w-3 !h-3 !bg-[#1e1e2e]"
+          className="!w-3 !h-3 !bg-[var(--color-surface-node)]"
           style={{
             border: `2px solid ${PORT_COLORS[port.type]}`,
             top: `${getHandlePosition(index, schema.outputs.length)}%`,

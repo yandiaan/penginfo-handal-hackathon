@@ -1,4 +1,20 @@
 import { useReactFlow } from '@xyflow/react';
+import {
+  Ban,
+  Brush,
+  Camera,
+  Cherry,
+  Gamepad2,
+  Globe2,
+  Landmark,
+  MoonStar,
+  Palette,
+  PartyPopper,
+  Plus,
+  Square,
+  TreePine,
+  Zap,
+} from 'lucide-react';
 import type { StyleConfigData, ArtStyle, MoodType, CulturalTheme } from '../../types/node-types';
 
 type Props = {
@@ -6,26 +22,30 @@ type Props = {
   data: StyleConfigData;
 };
 
-const ART_STYLES: { value: ArtStyle; icon: string }[] = [
-  { value: 'realistic', icon: '📷' },
-  { value: 'cartoon', icon: '🎨' },
-  { value: 'anime', icon: '⛩️' },
-  { value: 'watercolor', icon: '🖌️' },
-  { value: 'pixel-art', icon: '👾' },
-  { value: 'islamic-art', icon: '🕌' },
-  { value: 'pop-art', icon: '💥' },
-  { value: 'minimalist', icon: '◻️' },
+const ART_STYLES: { value: ArtStyle; Icon: typeof Camera }[] = [
+  { value: 'realistic', Icon: Camera },
+  { value: 'cartoon', Icon: Palette },
+  { value: 'anime', Icon: Landmark },
+  { value: 'watercolor', Icon: Brush },
+  { value: 'pixel-art', Icon: Gamepad2 },
+  { value: 'islamic-art', Icon: MoonStar },
+  { value: 'pop-art', Icon: Zap },
+  { value: 'minimalist', Icon: Square },
 ];
 
 const MOODS: MoodType[] = ['warm', 'cool', 'playful', 'elegant', 'spiritual', 'funny', 'cute'];
 
-const CULTURAL_THEMES: { value: CulturalTheme; label: string }[] = [
-  { value: 'ramadan', label: '🕌 Ramadan' },
-  { value: 'lebaran', label: '🎉 Lebaran' },
-  { value: 'natal', label: '🎄 Natal' },
-  { value: 'imlek', label: '🧧 Imlek' },
-  { value: 'general', label: '🌍 General' },
-  { value: null, label: '❌ None' },
+const CULTURAL_THEMES: {
+  value: CulturalTheme;
+  label: string;
+  Icon: typeof Globe2;
+}[] = [
+  { value: 'ramadan', label: 'Ramadan', Icon: MoonStar },
+  { value: 'lebaran', label: 'Lebaran', Icon: PartyPopper },
+  { value: 'natal', label: 'Natal', Icon: TreePine },
+  { value: 'imlek', label: 'Imlek', Icon: Cherry },
+  { value: 'general', label: 'General', Icon: Globe2 },
+  { value: null, label: 'None', Icon: Ban },
 ];
 
 export function StyleConfigPanel({ nodeId, data }: Props) {
@@ -45,9 +65,15 @@ export function StyleConfigPanel({ nodeId, data }: Props) {
             <button
               key={s.value}
               onClick={() => updateConfig({ artStyle: s.value })}
-              className={`px-1 py-2.5 rounded-md border text-white cursor-pointer text-[11px] text-center ${config.artStyle === s.value ? 'border-amber-500 bg-amber-500/15' : 'border-white/10 bg-white/5'}`}
+              className={`motion-lift motion-press focus-ring-orange px-1 py-2.5 rounded-xl border text-white cursor-pointer text-[11px] text-center transition-colors ${
+                config.artStyle === s.value
+                  ? 'border-[var(--editor-accent-65)] bg-[var(--editor-accent-14)]'
+                  : 'border-white/10 bg-white/5 hover:bg-white/7'
+              }`}
             >
-              <div className="text-lg">{s.icon}</div>
+              <div className="grid place-items-center">
+                <s.Icon size={16} className="text-white/80" />
+              </div>
               <div className="mt-1">{s.value}</div>
             </button>
           ))}
@@ -61,7 +87,11 @@ export function StyleConfigPanel({ nodeId, data }: Props) {
             <button
               key={mood}
               onClick={() => updateConfig({ mood })}
-              className={`px-3 py-1.5 rounded-full border text-white cursor-pointer text-xs ${config.mood === mood ? 'border-amber-500 bg-amber-500/15' : 'border-white/10 bg-white/5'}`}
+              className={`motion-lift motion-press focus-ring-orange px-3 py-1.5 rounded-full border text-white cursor-pointer text-xs transition-colors ${
+                config.mood === mood
+                  ? 'border-[var(--editor-accent-65)] bg-[var(--editor-accent-14)]'
+                  : 'border-white/10 bg-white/5 hover:bg-white/7'
+              }`}
             >
               {mood}
             </button>
@@ -76,9 +106,16 @@ export function StyleConfigPanel({ nodeId, data }: Props) {
             <button
               key={String(ct.value)}
               onClick={() => updateConfig({ culturalTheme: ct.value })}
-              className={`px-3 py-1.5 rounded-full border text-white cursor-pointer text-xs ${config.culturalTheme === ct.value ? 'border-amber-500 bg-amber-500/15' : 'border-white/10 bg-white/5'}`}
+              className={`motion-lift motion-press focus-ring-orange px-3 py-1.5 rounded-full border text-white cursor-pointer text-xs transition-colors ${
+                config.culturalTheme === ct.value
+                  ? 'border-[var(--editor-accent-65)] bg-[var(--editor-accent-14)]'
+                  : 'border-white/10 bg-white/5 hover:bg-white/7'
+              }`}
             >
-              {ct.label}
+              <span className="inline-flex items-center gap-2">
+                <ct.Icon size={14} className="text-white/70" />
+                <span>{ct.label}</span>
+              </span>
             </button>
           ))}
         </div>
@@ -102,9 +139,9 @@ export function StyleConfigPanel({ nodeId, data }: Props) {
           ))}
           <button
             onClick={() => updateConfig({ colorPalette: [...config.colorPalette, '#ffffff'] })}
-            className="w-8 h-8 rounded-md border border-dashed border-white/30 bg-transparent text-white/50 cursor-pointer text-base"
+            className="motion-lift motion-press focus-ring-orange w-8 h-8 rounded-md border border-dashed border-white/30 bg-transparent text-white/50 cursor-pointer grid place-items-center"
           >
-            +
+            <Plus size={16} />
           </button>
         </div>
       </div>

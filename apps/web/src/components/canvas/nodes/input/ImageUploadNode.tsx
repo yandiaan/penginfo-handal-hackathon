@@ -9,7 +9,7 @@ export function ImageUploadNode({ data, selected }: NodeProps<ImageUploadData>) 
   return (
     <CompactNode
       nodeType="imageUpload"
-      icon="🖼️"
+      icon=""
       title={data.label}
       subtitle={hasImage ? `${config.fileName} (${config.fileSizeMB?.toFixed(1)}MB)` : undefined}
       selected={selected}

@@ -8,7 +8,7 @@ export function ExportNode({ data, selected }: NodeProps<ExportData>) {
   return (
     <CompactNode
       nodeType="export"
-      icon="💾"
+      icon=""
       title={data.label}
       subtitle={`${config.format.toUpperCase()} · ${config.quality}%`}
       selected={selected}

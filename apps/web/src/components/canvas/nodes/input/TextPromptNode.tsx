@@ -14,7 +14,7 @@ export function TextPromptNode({ data, selected }: NodeProps<TextPromptData>) {
   return (
     <CompactNode
       nodeType="textPrompt"
-      icon="📝"
+      icon=""
       title={data.label}
       subtitle={charCount > 0 ? `${charCount}/${config.maxLength} chars` : undefined}
       selected={selected}
