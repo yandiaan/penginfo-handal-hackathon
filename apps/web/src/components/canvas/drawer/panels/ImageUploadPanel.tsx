@@ -1,4 +1,5 @@
 import { useReactFlow } from '@xyflow/react';
+import { FolderOpen } from 'lucide-react';
 import type { ImageUploadData } from '../../types/node-types';
 
 type Props = {
@@ -50,7 +51,7 @@ export function ImageUploadPanel({ nodeId, data }: Props) {
               </span>
               <button
                 onClick={handleClear}
-                className="bg-red-400/10 border border-red-400/30 text-red-400 px-2.5 py-1 rounded-md cursor-pointer text-[11px]"
+                className="motion-lift motion-press focus-ring-orange bg-red-400/10 border border-red-400/30 text-red-300 px-2.5 py-1 rounded-md cursor-pointer text-[11px] hover:bg-red-400/15 transition-colors"
               >
                 Clear
               </button>
@@ -58,10 +59,14 @@ export function ImageUploadPanel({ nodeId, data }: Props) {
           </div>
         ) : (
           <div
-            className="border-2 border-dashed border-white/20 rounded-lg py-[30px] text-center cursor-pointer"
+            className="motion-lift motion-press focus-ring-orange border-2 border-dashed border-white/20 rounded-xl py-[30px] text-center cursor-pointer bg-white/3 hover:bg-white/5 transition-colors"
             onClick={() => document.getElementById(`upload-${nodeId}`)?.click()}
           >
-            <div className="text-[32px] mb-2">📁</div>
+            <div className="grid place-items-center mb-2">
+              <span className="grid place-items-center w-12 h-12 rounded-xl bg-white/5 border border-white/10">
+                <FolderOpen size={22} className="text-white/75" />
+              </span>
+            </div>
             <div className="text-white/50 text-[13px]">Click or drop image here</div>
             <div className="text-white/30 text-[11px] mt-1">Max {config.maxSizeMB}MB</div>
           </div>

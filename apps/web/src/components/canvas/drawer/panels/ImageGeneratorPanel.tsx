@@ -1,4 +1,5 @@
 import { useReactFlow } from '@xyflow/react';
+import { ArrowRight, Image, Type } from 'lucide-react';
 
 import type { ImageGeneratorData, ImageDimension } from '../../types/node-types';
 
@@ -26,8 +27,24 @@ export function ImageGeneratorPanel({ nodeId, data }: Props) {
     <>
       <div className="flex flex-col gap-3">
         <label className="block text-white/70 text-xs font-medium mb-2">Mode</label>
-        <div className="text-white/50 text-[13px] p-2 px-3 bg-white/5 rounded-md">
-          {config.mode === 'text2img' ? '📝 → 🖼️ Text to Image' : '🖼️ → 🖼️ Image to Image'}
+        <div className="text-white/55 text-[13px] p-3 bg-white/5 rounded-xl border border-white/10">
+          <div className="inline-flex items-center gap-2">
+            {config.mode === 'text2img' ? (
+              <>
+                <Type size={14} className="text-white/70" />
+                <ArrowRight size={14} className="text-white/40" />
+                <Image size={14} className="text-white/70" />
+                <span>Text to Image</span>
+              </>
+            ) : (
+              <>
+                <Image size={14} className="text-white/70" />
+                <ArrowRight size={14} className="text-white/40" />
+                <Image size={14} className="text-white/70" />
+                <span>Image to Image</span>
+              </>
+            )}
+          </div>
           <div className="text-[11px] text-white/30 mt-1">Auto-detected from connections</div>
         </div>
       </div>
@@ -39,7 +56,11 @@ export function ImageGeneratorPanel({ nodeId, data }: Props) {
             <button
               key={dim.value}
               onClick={() => updateConfig({ dimensions: dim.value })}
-              className={`py-2.5 px-3 rounded-md border text-white cursor-pointer text-xs text-left ${config.dimensions === dim.value ? 'border-blue-400 bg-blue-400/15' : 'border-white/10 bg-white/5'}`}
+              className={`motion-lift motion-press focus-ring-orange py-2.5 px-3 rounded-xl border text-white cursor-pointer text-xs text-left transition-colors ${
+                config.dimensions === dim.value
+                  ? 'border-[var(--editor-accent-65)] bg-[var(--editor-accent-14)]'
+                  : 'border-white/10 bg-white/5 hover:bg-white/7'
+              }`}
             >
               {dim.label}
             </button>

@@ -1,4 +1,5 @@
 import { useReactFlow } from '@xyflow/react';
+import { Languages, Palette, Scale, Shuffle, Target } from 'lucide-react';
 import type {
   PromptEnhancerData,
   CreativityLevel,
@@ -11,10 +12,14 @@ type Props = {
   data: PromptEnhancerData;
 };
 
-const CREATIVITY_OPTIONS: { value: CreativityLevel; label: string; icon: string }[] = [
-  { value: 'precise', label: 'Precise', icon: '🎯' },
-  { value: 'balanced', label: 'Balanced', icon: '⚖️' },
-  { value: 'creative', label: 'Creative', icon: '🎨' },
+const CREATIVITY_OPTIONS: {
+  value: CreativityLevel;
+  label: string;
+  Icon: typeof Target;
+}[] = [
+  { value: 'precise', label: 'Precise', Icon: Target },
+  { value: 'balanced', label: 'Balanced', Icon: Scale },
+  { value: 'creative', label: 'Creative', Icon: Palette },
 ];
 
 const CONTENT_TYPES: ContentType[] = ['wishes', 'meme', 'character', 'avatar', 'general'];
@@ -37,13 +42,15 @@ export function PromptEnhancerPanel({ nodeId, data }: Props) {
             <button
               key={opt.value}
               onClick={() => updateConfig({ creativity: opt.value })}
-              className={`flex-1 p-2.5 rounded-md border cursor-pointer text-xs text-center text-white ${
+              className={`motion-lift motion-press focus-ring-orange flex-1 p-3 rounded-xl border cursor-pointer text-xs text-center text-white transition-colors ${
                 config.creativity === opt.value
-                  ? 'border-violet-400 bg-violet-400/15'
-                  : 'border-white/10 bg-white/5'
+                  ? 'border-[var(--editor-accent-65)] bg-[var(--editor-accent-14)]'
+                  : 'border-white/10 bg-white/5 hover:bg-white/7'
               }`}
             >
-              <div>{opt.icon}</div>
+              <div className="grid place-items-center">
+                <opt.Icon size={16} className="text-white/80" />
+              </div>
               <div className="mt-1">{opt.label}</div>
             </button>
           ))}
@@ -57,10 +64,10 @@ export function PromptEnhancerPanel({ nodeId, data }: Props) {
             <button
               key={ct}
               onClick={() => updateConfig({ contentType: ct })}
-              className={`px-3 py-1.5 rounded-full border cursor-pointer text-xs text-white ${
+              className={`motion-lift motion-press focus-ring-orange px-3 py-1.5 rounded-full border cursor-pointer text-xs text-white transition-colors ${
                 config.contentType === ct
-                  ? 'border-violet-400 bg-violet-400/15'
-                  : 'border-white/10 bg-white/5'
+                  ? 'border-[var(--editor-accent-65)] bg-[var(--editor-accent-14)]'
+                  : 'border-white/10 bg-white/5 hover:bg-white/7'
               }`}
             >
               {ct}
@@ -76,10 +83,10 @@ export function PromptEnhancerPanel({ nodeId, data }: Props) {
             <button
               key={tone}
               onClick={() => updateConfig({ tone })}
-              className={`px-3 py-1.5 rounded-full border cursor-pointer text-xs text-white ${
+              className={`motion-lift motion-press focus-ring-orange px-3 py-1.5 rounded-full border cursor-pointer text-xs text-white transition-colors ${
                 config.tone === tone
-                  ? 'border-violet-400 bg-violet-400/15'
-                  : 'border-white/10 bg-white/5'
+                  ? 'border-[var(--editor-accent-65)] bg-[var(--editor-accent-14)]'
+                  : 'border-white/10 bg-white/5 hover:bg-white/7'
               }`}
             >
               {tone}
@@ -95,13 +102,20 @@ export function PromptEnhancerPanel({ nodeId, data }: Props) {
             <button
               key={lang}
               onClick={() => updateConfig({ language: lang })}
-              className={`flex-1 p-2 rounded-md border cursor-pointer text-xs text-white ${
+              className={`motion-lift motion-press focus-ring-orange flex-1 p-2.5 rounded-xl border cursor-pointer text-xs text-white transition-colors ${
                 config.language === lang
-                  ? 'border-violet-400 bg-violet-400/15'
-                  : 'border-white/10 bg-white/5'
+                  ? 'border-[var(--editor-accent-65)] bg-[var(--editor-accent-14)]'
+                  : 'border-white/10 bg-white/5 hover:bg-white/7'
               }`}
             >
-              {lang === 'id' ? '🇮🇩 ID' : lang === 'en' ? '🇬🇧 EN' : '🔀 Mix'}
+              <span className="inline-flex items-center justify-center gap-2">
+                {lang === 'mixed' ? (
+                  <Shuffle size={14} className="text-white/70" />
+                ) : (
+                  <Languages size={14} className="text-white/70" />
+                )}
+                <span>{lang === 'id' ? 'ID' : lang === 'en' ? 'EN' : 'Mix'}</span>
+              </span>
             </button>
           ))}
         </div>
