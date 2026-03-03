@@ -1,18 +1,20 @@
 import { useNodeId } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import { CompactNode } from '../CompactNode';
-import type { TextOverlayData } from '../../types/node-types';
+import type { FrameBorderData } from '../../types/node-types';
 import type { ImageData } from '../../types/port-types';
 import { useExecutionContext } from '../../execution/ExecutionContext';
 
-const POSITION_MAP: Record<string, { top?: string; bottom?: string; left: string; transform: string }> = {
-  top:    { top: '8%',    bottom: undefined, left: '50%', transform: 'translateX(-50%)' },
-  center: { top: '50%',  bottom: undefined, left: '50%', transform: 'translate(-50%,-50%)' },
-  bottom: { top: undefined, bottom: '8%',   left: '50%', transform: 'translateX(-50%)' },
-  custom: { top: '50%',  bottom: undefined, left: '50%', transform: 'translate(-50%,-50%)' },
+const STYLE_ICONS: Record<string, string> = {
+  islamic: '✴️',
+  floral: '🌸',
+  polaroid: '📸',
+  neon: '💜',
+  'torn-paper': '📝',
+  none: '□',
 };
 
-export function TextOverlayNode({ data, selected }: NodeProps<Node<TextOverlayData>>) {
+export function FrameBorderNode({ data, selected }: NodeProps<Node<FrameBorderData>>) {
   const { config } = data;
   const nodeId = useNodeId();
   const { getNodeState } = useExecutionContext();
@@ -21,35 +23,28 @@ export function TextOverlayNode({ data, selected }: NodeProps<Node<TextOverlayDa
   const isDone = execState?.status === 'done';
   const outputImage = isDone ? (execState?.output?.type === 'image' ? (execState.output.data as ImageData) : null) : null;
 
-  const preview = config.text
-    ? config.text.length > 24 ? `${config.text.slice(0, 24)}…` : config.text
-    : 'Text from input';
-  const pos = POSITION_MAP[config.position] ?? POSITION_MAP.bottom;
+  const icon = STYLE_ICONS[config.style] ?? '🖼️';
 
   return (
     <CompactNode
-      nodeType="textOverlay"
-      icon=""
+      nodeType="frameBorder"
+      icon="🖼️"
       title={data.label}
       selected={selected}
     >
-      {/* Miniature position preview */}
-      <div className="relative w-full h-14 rounded-md bg-white/5 border border-white/10 overflow-hidden mb-2">
-        <div className="absolute inset-2 rounded bg-white/5" />
-        <div
-          className="absolute text-[8px] font-bold px-1 py-px rounded text-white"
-          style={{ ...pos, backgroundColor: `${config.fontColor}80`, color: config.fontColor, whiteSpace: 'nowrap', maxWidth: '90%', overflow: 'hidden', textOverflow: 'ellipsis' }}
-        >
-          {preview}
-        </div>
+      {/* Frame preview */}
+      <div
+        className="relative w-full h-12 rounded-md overflow-hidden flex items-center justify-center mb-2"
+        style={{ border: `${Math.min(config.thickness, 8)}px solid ${config.color}`, backgroundColor: `${config.color}15` }}
+      >
+        <span className="text-[18px]">{icon}</span>
       </div>
-      {/* Meta */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <span className="text-[9px] px-1.5 py-px rounded bg-[#f59e0b]/20 text-[#f59e0b]">{config.position}</span>
-        <span className="text-[9px] text-white/30">{config.font}</span>
-        {config.effect !== 'none' && (
-          <span className="text-[9px] px-1.5 py-px rounded bg-white/8 text-white/40">{config.effect}</span>
-        )}
+      <div className="flex items-center gap-1.5">
+        <span className="text-[9px] font-semibold px-1.5 py-px rounded bg-[#f59e0b]/20 text-[#f59e0b] capitalize">
+          {config.style}
+        </span>
+        <span className="text-[9px] text-white/30">{config.thickness}px thick</span>
+        <div className="w-3.5 h-3.5 rounded-full border border-white/20 ml-auto flex-shrink-0" style={{ backgroundColor: config.color }} />
       </div>
     
       {/* ── Output preview ──────────────────────────────── */}

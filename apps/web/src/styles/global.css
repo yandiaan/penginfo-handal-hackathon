@@ -26,4 +26,37 @@
   .react-flow__attribution {
     display: none !important;
   }
+
+  /* ── Custom scrollbar ─────────────────────────────────────── */
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #3a3a4a transparent;
+  }
+  *:hover {
+    scrollbar-color: #fe733a40 transparent;
+  }
+
+  /* Chrome / Edge / Safari */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #3a3a4a;
+    border-radius: 99px;
+    transition: background 0.2s;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #fe733a80;
+  }
+  ::-webkit-scrollbar-thumb:active {
+    background: #fe733a;
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
 }

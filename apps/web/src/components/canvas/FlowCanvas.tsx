@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import {
   Background,
   BackgroundVariant,
@@ -6,8 +6,11 @@ import {
   MiniMap,
   ReactFlow,
   SelectionMode,
+  useReactFlow,
   type Node,
   type NodeMouseHandler,
+  type OnConnectStart,
+  type OnConnectEnd,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { useFlowNodes } from './hooks/useFlowNodes';
@@ -21,16 +24,37 @@ import { FlowToolbar } from './FlowToolbar';
 import { LogPanel } from './LogPanel';
 import { nodeTypes } from './nodes';
 import { AnimatedNodeDetailDrawer } from './drawer/AnimatedNodeDetailDrawer';
-import type { CustomNodeData } from './types/node-types';
+import { ConnectPortMenu, type ConnectMenuState } from './ConnectPortMenu';
+import { NODE_PORT_SCHEMAS } from './types/node-types';
+import type { CustomNodeData, CustomNodeType } from './types/node-types';
+import type { PortDataType } from './types/port-types';
 
 export function FlowCanvasInner() {
-  const { nodes, edges, setNodes, setEdges, onNodesChange, onEdgesChange, onConnect, addNode } =
-    useFlowNodes();
+  const {
+    nodes,
+    edges,
+    setNodes,
+    setEdges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    addNode,
+    addNodeAtPosition,
+    connectPorts,
+  } = useFlowNodes();
   const { mode, setMode } = useMouseMode();
   const [selectedNode, setSelectedNode] = useState<Node<CustomNodeData> | null>(null);
   const [logOpen, setLogOpen] = useState(false);
+  const [connectMenu, setConnectMenu] = useState<ConnectMenuState | null>(null);
+  const connectStartRef = useRef<{
+    nodeId: string;
+    handleId: string;
+    handleType: 'source' | 'target';
+  } | null>(null);
+  const connectionMadeRef = useRef(false);
   const executionStore = useExecutionStore();
   const logStore = useLogStore();
+  const { screenToFlowPosition, getNode } = useReactFlow();
 
   // Load template from URL params on mount
   useTemplateLoader(setNodes, setEdges);
@@ -41,11 +65,99 @@ export function FlowCanvasInner() {
 
   const handlePaneClick = useCallback(() => {
     setSelectedNode(null);
+    // Note: ConnectPortMenu closes itself via its own outside-click listener.
+    // Do NOT call setConnectMenu(null) here — it would race with onConnectEnd.
   }, []);
 
   const handleCloseDrawer = useCallback(() => {
     setSelectedNode(null);
   }, []);
+
+  // ---------------- connect-to-empty-canvas handlers ----------------
+  // Wrap onConnect so we know when a real edge was formed during a drag.
+  const handleConnect = useCallback<typeof onConnect>(
+    (connection) => {
+      connectionMadeRef.current = true;
+      onConnect(connection);
+    },
+    [onConnect],
+  );
+
+  const handleConnectStart: OnConnectStart = useCallback(
+    (_event, { nodeId, handleId, handleType }) => {
+      if (nodeId && handleId && handleType) {
+        connectStartRef.current = { nodeId, handleId, handleType };
+        connectionMadeRef.current = false;
+      }
+    },
+    [],
+  );
+
+  const handleConnectEnd: OnConnectEnd = useCallback(
+    (event, _connectionState) => {
+      const start = connectStartRef.current;
+      connectStartRef.current = null;
+
+      // If a real edge was formed (onConnect fired), skip the menu.
+      if (connectionMadeRef.current) {
+        connectionMadeRef.current = false;
+        return;
+      }
+      connectionMadeRef.current = false;
+
+      if (!start) {
+        return;
+      }
+
+      // Resolve port type from source node schema
+      const sourceNode = getNode(start.nodeId);
+      if (!sourceNode?.type) {
+        return;
+      }
+      const schema = NODE_PORT_SCHEMAS[sourceNode.type as CustomNodeType];
+      const portList = start.handleType === 'source' ? schema.outputs : schema.inputs;
+      const port = portList.find((p) => p.id === start.handleId);
+      if (!port) {
+        return;
+      }
+
+      const { clientX, clientY } =
+        'touches' in event ? (event as TouchEvent).changedTouches[0] : (event as MouseEvent);
+
+      setConnectMenu({
+        visible: true,
+        clientX,
+        clientY,
+        portType: port.type as PortDataType,
+        direction: start.handleType === 'source' ? 'source' : 'target',
+        sourceNodeId: start.nodeId,
+        sourcePortId: start.handleId,
+      });
+    },
+    [getNode],
+  );
+
+  /** Called when user picks a node from the ConnectPortMenu. */
+  const handleConnectMenuSelect = useCallback(
+    (nodeType: CustomNodeType, compatiblePortId: string) => {
+      if (!connectMenu) return;
+      const flowPos = screenToFlowPosition({
+        x: connectMenu.clientX + 60,
+        y: connectMenu.clientY - 20,
+      });
+      const newId = addNodeAtPosition(nodeType, flowPos);
+
+      // Auto-wire the edge
+      if (connectMenu.direction === 'source') {
+        // dragged from output → connect to compatible input on new node
+        connectPorts(connectMenu.sourceNodeId, connectMenu.sourcePortId, newId, compatiblePortId);
+      } else {
+        // dragged from input → connect from compatible output on new node
+        connectPorts(newId, compatiblePortId, connectMenu.sourceNodeId, connectMenu.sourcePortId);
+      }
+    },
+    [connectMenu, addNodeAtPosition, connectPorts, screenToFlowPosition],
+  );
 
   const handleRunPipeline = useCallback(async () => {
     setLogOpen(true); // Auto-open log panel on run
@@ -77,7 +189,9 @@ export function FlowCanvasInner() {
           nodeTypes={nodeTypes as any}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
+          onConnect={handleConnect}
+          onConnectStart={handleConnectStart}
+          onConnectEnd={handleConnectEnd}
           onNodeClick={handleNodeClick as any}
           onPaneClick={handlePaneClick}
           fitView
@@ -117,6 +231,15 @@ export function FlowCanvasInner() {
           selectedNode={currentSelectedNode as Node<CustomNodeData> | null}
           onClose={handleCloseDrawer}
         />
+
+        {/* Connect-to-empty-canvas port menu */}
+        {connectMenu?.visible && (
+          <ConnectPortMenu
+            state={connectMenu}
+            onSelect={handleConnectMenuSelect}
+            onClose={() => setConnectMenu(null)}
+          />
+        )}
       </div>
     </ExecutionContext.Provider>
   );

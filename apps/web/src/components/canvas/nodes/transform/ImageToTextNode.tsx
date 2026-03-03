@@ -1,17 +1,14 @@
 import { useNodeId } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import { CompactNode } from '../CompactNode';
-import type { PromptEnhancerData } from '../../types/node-types';
+import type { ImageToTextData } from '../../types/node-types';
 import type { TextData } from '../../types/port-types';
 import { useExecutionContext } from '../../execution/ExecutionContext';
 
-const CREATIVITY_STEPS = ['precise', 'balanced', 'creative'] as const;
-const TONE_COLORS: Record<string, string> = {
-  formal: '#60a5fa', casual: '#4ade80', funny: '#fb923c', heartfelt: '#f472b6',
-};
-const LANG_FLAG: Record<string, string> = { id: '🇮🇩', en: '🇬🇧', mixed: '🌐' };
+const DETAIL_BARS: Record<string, number> = { brief: 1, detailed: 2, artistic: 3 };
+const LANG_LABEL: Record<string, string> = { id: 'ID', en: 'EN' };
 
-export function PromptEnhancerNode({ data, selected }: NodeProps<Node<PromptEnhancerData>>) {
+export function ImageToTextNode({ data, selected }: NodeProps<Node<ImageToTextData>>) {
   const { config } = data;
   const nodeId = useNodeId();
   const { getNodeState } = useExecutionContext();
@@ -20,38 +17,39 @@ export function PromptEnhancerNode({ data, selected }: NodeProps<Node<PromptEnha
   const isDone = execState?.status === 'done';
   const outputText = isDone ? (execState?.output?.type === 'text' ? (execState.output.data as TextData).text : null) : null;
 
-  const creativeIdx = CREATIVITY_STEPS.indexOf(config.creativity as (typeof CREATIVITY_STEPS)[number]);
-  const toneColor = TONE_COLORS[config.tone] ?? '#a78bfa';
+  const bars = DETAIL_BARS[config.detailLevel] ?? 2;
 
   return (
-    <CompactNode nodeType="promptEnhancer" icon="" title={data.label} selected={selected}>
-      {/* Creativity bar */}
-      <div className="mb-2.5">
-        <div className="flex justify-between text-[9px] text-white/25 mb-1.5">
-          <span>Precise</span><span>Balanced</span><span>Creative</span>
-        </div>
+    <CompactNode
+      nodeType="imageToText"
+      icon="👁️"
+      title={data.label}
+      selected={selected}
+    >
+      {/* Port flow: image → text */}
+      <div className="flex items-center gap-1.5 mb-2">
+        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#60a5fa]/15 text-[#60a5fa] font-semibold">IMG</span>
+        <svg width="20" height="8" viewBox="0 0 20 8">
+          <path d="M0 4 H14 M14 1 L19 4 L14 7" stroke="rgba(255,255,255,0.2)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+        </svg>
+        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[#4ade80]/15 text-[#4ade80] font-semibold">TEXT</span>
+        <span className="ml-auto text-[9px] font-semibold px-1.5 py-px rounded bg-[#60a5fa]/10 text-[#60a5fa]">
+          {LANG_LABEL[config.language]}
+        </span>
+      </div>
+      {/* Detail level */}
+      <div className="flex items-center gap-1.5">
+        <span className="text-[9px] text-white/30 w-12">Detail</span>
         <div className="flex gap-1">
-          {CREATIVITY_STEPS.map((step, i) => (
+          {[1, 2, 3].map((b) => (
             <div
-              key={step}
-              className="flex-1 h-1.5 rounded-full"
-              style={{ backgroundColor: i <= creativeIdx ? '#a78bfa' : 'rgba(167,139,250,0.12)' }}
+              key={b}
+              className="w-5 h-1.5 rounded-full"
+              style={{ backgroundColor: b <= bars ? '#a78bfa' : 'rgba(167,139,250,0.15)' }}
             />
           ))}
         </div>
-      </div>
-      {/* Tag row */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <span
-          className="text-[9px] font-semibold px-1.5 py-px rounded-full border"
-          style={{ color: toneColor, borderColor: toneColor + '40', backgroundColor: toneColor + '15' }}
-        >
-          {config.tone}
-        </span>
-        <span className="text-[9px] px-1.5 py-px rounded-full text-white/40" style={{ background: 'rgba(255,255,255,0.06)' }}>
-          {config.contentType}
-        </span>
-        <span className="text-[11px] ml-auto" title={config.language}>{LANG_FLAG[config.language] ?? config.language}</span>
+        <span className="text-[9px] text-white/35 ml-1">{config.detailLevel}</span>
       </div>
     
       {/* ── Output preview ──────────────────────────────── */}

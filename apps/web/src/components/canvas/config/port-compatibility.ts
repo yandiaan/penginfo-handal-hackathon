@@ -3,7 +3,7 @@ import type { PortDataType } from '../types/port-types';
 // Static compatibility matrix: source type → allowed target types
 export const PORT_COMPATIBILITY: Record<PortDataType, PortDataType[]> = {
   text: ['text'],
-  prompt: ['prompt'],
+  prompt: ['prompt', 'text'], // legacy: prompt outputs can feed text inputs
   image: ['image', 'media'],
   video: ['video', 'media'],
   style: ['style'],

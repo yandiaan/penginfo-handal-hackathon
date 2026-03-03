@@ -8,13 +8,25 @@ import { renderNodeTypeIcon } from '../icons/nodeTypeIcon';
 import { TextPromptPanel } from './panels/TextPromptPanel';
 import { ImageUploadPanel } from './panels/ImageUploadPanel';
 import { TemplatePresetPanel } from './panels/TemplatePresetPanel';
+import { ColorPalettePanel } from './panels/ColorPalettePanel';
 import { PromptEnhancerPanel } from './panels/PromptEnhancerPanel';
 import { StyleConfigPanel } from './panels/StyleConfigPanel';
+import { ImageToTextPanel } from './panels/ImageToTextPanel';
+import { TranslateTextPanel } from './panels/TranslateTextPanel';
+import { BackgroundRemoverPanel } from './panels/BackgroundRemoverPanel';
+import { FaceCropPanel } from './panels/FaceCropPanel';
 import { ImageGeneratorPanel } from './panels/ImageGeneratorPanel';
 import { VideoGeneratorPanel } from './panels/VideoGeneratorPanel';
+import { InpaintingPanel } from './panels/InpaintingPanel';
+import { ImageUpscalerPanel } from './panels/ImageUpscalerPanel';
 import { TextOverlayPanel } from './panels/TextOverlayPanel';
+import { FrameBorderPanel } from './panels/FrameBorderPanel';
+import { StickerLayerPanel } from './panels/StickerLayerPanel';
+import { ColorFilterPanel } from './panels/ColorFilterPanel';
+import { CollageLayoutPanel } from './panels/CollageLayoutPanel';
 import { PreviewPanel } from './panels/PreviewPanel';
 import { ExportPanelNew } from './panels/ExportPanelNew';
+import { WatermarkPanel } from './panels/WatermarkPanel';
 
 type Props = {
   selectedNode: Node<CustomNodeData> | null;
@@ -58,6 +70,30 @@ export function NodeDetailDrawer({ selectedNode, onClose, closing = false }: Pro
         return <PreviewPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
       case 'export':
         return <ExportPanelNew nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'colorPalette':
+        return <ColorPalettePanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'imageToText':
+        return <ImageToTextPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'translateText':
+        return <TranslateTextPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'backgroundRemover':
+        return <BackgroundRemoverPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'faceCrop':
+        return <FaceCropPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'inpainting':
+        return <InpaintingPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'imageUpscaler':
+        return <ImageUpscalerPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'frameBorder':
+        return <FrameBorderPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'stickerLayer':
+        return <StickerLayerPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'colorFilter':
+        return <ColorFilterPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'collageLayout':
+        return <CollageLayoutPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
+      case 'watermark':
+        return <WatermarkPanel nodeId={selectedNode.id} data={selectedNode.data as any} />;
       default:
         return <div className="text-white/50">Unknown node type</div>;
     }

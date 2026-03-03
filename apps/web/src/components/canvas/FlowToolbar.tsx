@@ -731,7 +731,7 @@ export function FlowToolbar({
                   )}
                 </span>
                 <span className="text-[13px] font-semibold font-[system-ui,sans-serif]">
-                  {pipelineRunning ? 'Running…' : 'Run Pipeline'}
+                  {pipelineRunning ? 'Running…' : 'Run'}
                 </span>
               </button>
             )}

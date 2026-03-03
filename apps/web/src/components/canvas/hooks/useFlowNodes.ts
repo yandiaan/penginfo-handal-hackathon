@@ -24,7 +24,7 @@ function createDefaultNodeData(nodeType: CustomNodeType): CustomNodeData {
 
   const config = defaultConfigs[nodeType];
   if (config) {
-    return { ...baseData, config: { ...config } } as CustomNodeData;
+    return { ...baseData, config: { ...config } } as unknown as CustomNodeData;
   }
   return { ...baseData, config: {} } as unknown as CustomNodeData;
 }
@@ -66,15 +66,30 @@ export function useFlowNodes() {
         y: window.innerHeight / 2,
       });
       const data = createDefaultNodeData(type);
-      const newNode: Node = {
-        id,
-        type,
-        data,
-        position,
-      };
+      const newNode: Node = { id, type, data, position };
       setNodes((nds) => [...nds, newNode]);
     },
     [screenToFlowPosition, setNodes],
+  );
+
+  /** Add a node at an explicit flow-space position. Returns the new node id. */
+  const addNodeAtPosition = useCallback(
+    (type: CustomNodeType, position: { x: number; y: number }): string => {
+      const id = String(++idCounter.current);
+      const data = createDefaultNodeData(type);
+      const newNode: Node = { id, type, data, position };
+      setNodes((nds) => [...nds, newNode]);
+      return id;
+    },
+    [setNodes],
+  );
+
+  /** Create an edge between two ports. */
+  const connectPorts = useCallback(
+    (source: string, sourceHandle: string, target: string, targetHandle: string) => {
+      setEdges((eds) => addEdge({ source, sourceHandle, target, targetHandle }, eds));
+    },
+    [setEdges],
   );
 
   return {
@@ -86,5 +101,7 @@ export function useFlowNodes() {
     onEdgesChange,
     onConnect,
     addNode,
+    addNodeAtPosition,
+    connectPorts,
   } as const;
 }

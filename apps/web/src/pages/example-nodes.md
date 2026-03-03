@@ -421,7 +421,7 @@ layout: ../layouts/main.astro
       </div>
     </section>
     <div class="text-center pb-24 border-t border-zinc-800 pt-8 flex items-center justify-between">
-      <p class="text-sm text-zinc-500">© 2026 Penginfo Handal &bull; Node Architecture Sandbox</p>
+      <p class="text-sm text-zinc-500">© 2026 ADIS AI &bull; Node Architecture Sandbox</p>
       <div class="flex gap-2">
          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
          <span class="w-2 h-2 rounded-full bg-pink-500"></span>

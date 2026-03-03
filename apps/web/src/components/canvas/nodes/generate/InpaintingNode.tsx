@@ -1,18 +1,11 @@
 import { useNodeId } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import { CompactNode } from '../CompactNode';
-import type { TextOverlayData } from '../../types/node-types';
+import type { InpaintingData } from '../../types/node-types';
 import type { ImageData } from '../../types/port-types';
 import { useExecutionContext } from '../../execution/ExecutionContext';
 
-const POSITION_MAP: Record<string, { top?: string; bottom?: string; left: string; transform: string }> = {
-  top:    { top: '8%',    bottom: undefined, left: '50%', transform: 'translateX(-50%)' },
-  center: { top: '50%',  bottom: undefined, left: '50%', transform: 'translate(-50%,-50%)' },
-  bottom: { top: undefined, bottom: '8%',   left: '50%', transform: 'translateX(-50%)' },
-  custom: { top: '50%',  bottom: undefined, left: '50%', transform: 'translate(-50%,-50%)' },
-};
-
-export function TextOverlayNode({ data, selected }: NodeProps<Node<TextOverlayData>>) {
+export function InpaintingNode({ data, selected }: NodeProps<Node<InpaintingData>>) {
   const { config } = data;
   const nodeId = useNodeId();
   const { getNodeState } = useExecutionContext();
@@ -21,35 +14,34 @@ export function TextOverlayNode({ data, selected }: NodeProps<Node<TextOverlayDa
   const isDone = execState?.status === 'done';
   const outputImage = isDone ? (execState?.output?.type === 'image' ? (execState.output.data as ImageData) : null) : null;
 
-  const preview = config.text
-    ? config.text.length > 24 ? `${config.text.slice(0, 24)}…` : config.text
-    : 'Text from input';
-  const pos = POSITION_MAP[config.position] ?? POSITION_MAP.bottom;
+  const strengthColor = config.strength > 80 ? '#f87171' : config.strength > 50 ? '#60a5fa' : '#4ade80';
 
   return (
     <CompactNode
-      nodeType="textOverlay"
-      icon=""
+      nodeType="inpainting"
+      icon="🪄"
       title={data.label}
       selected={selected}
     >
-      {/* Miniature position preview */}
-      <div className="relative w-full h-14 rounded-md bg-white/5 border border-white/10 overflow-hidden mb-2">
-        <div className="absolute inset-2 rounded bg-white/5" />
-        <div
-          className="absolute text-[8px] font-bold px-1 py-px rounded text-white"
-          style={{ ...pos, backgroundColor: `${config.fontColor}80`, color: config.fontColor, whiteSpace: 'nowrap', maxWidth: '90%', overflow: 'hidden', textOverflow: 'ellipsis' }}
-        >
-          {preview}
+      {/* Strength bar */}
+      <div className="mb-2">
+        <div className="flex justify-between text-[9px] text-white/25 mb-1">
+          <span>Strength</span>
+          <span style={{ color: strengthColor }} className="font-semibold">{config.strength}%</span>
+        </div>
+        <div className="h-2 rounded-full bg-white/8 overflow-hidden">
+          <div
+            className="h-full rounded-full transition-all"
+            style={{ width: `${config.strength}%`, backgroundColor: strengthColor }}
+          />
         </div>
       </div>
-      {/* Meta */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <span className="text-[9px] px-1.5 py-px rounded bg-[#f59e0b]/20 text-[#f59e0b]">{config.position}</span>
-        <span className="text-[9px] text-white/30">{config.font}</span>
-        {config.effect !== 'none' && (
-          <span className="text-[9px] px-1.5 py-px rounded bg-white/8 text-white/40">{config.effect}</span>
-        )}
+      {/* Mode */}
+      <div className="flex items-center gap-2">
+        <span className="text-[9px] font-semibold px-1.5 py-px rounded bg-[#60a5fa]/20 text-[#60a5fa] capitalize">
+          {config.mode}
+        </span>
+        <span className="text-[9px] text-white/20">Wan Inpaint</span>
       </div>
     
       {/* ── Output preview ──────────────────────────────── */}

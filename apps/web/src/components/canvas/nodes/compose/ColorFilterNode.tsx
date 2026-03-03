@@ -1,18 +1,21 @@
 import { useNodeId } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import { CompactNode } from '../CompactNode';
-import type { TextOverlayData } from '../../types/node-types';
+import type { ColorFilterData } from '../../types/node-types';
 import type { ImageData } from '../../types/port-types';
 import { useExecutionContext } from '../../execution/ExecutionContext';
 
-const POSITION_MAP: Record<string, { top?: string; bottom?: string; left: string; transform: string }> = {
-  top:    { top: '8%',    bottom: undefined, left: '50%', transform: 'translateX(-50%)' },
-  center: { top: '50%',  bottom: undefined, left: '50%', transform: 'translate(-50%,-50%)' },
-  bottom: { top: undefined, bottom: '8%',   left: '50%', transform: 'translateX(-50%)' },
-  custom: { top: '50%',  bottom: undefined, left: '50%', transform: 'translate(-50%,-50%)' },
+const FILTER_META: Record<string, { gradient: string; label: string }> = {
+  none:       { gradient: 'linear-gradient(90deg, #555, #888)', label: 'No Filter' },
+  warm:       { gradient: 'linear-gradient(90deg, #fb923c, #fbbf24)', label: 'Warm' },
+  vintage:    { gradient: 'linear-gradient(90deg, #92400e, #d97706)', label: 'Vintage' },
+  'eid-gold': { gradient: 'linear-gradient(90deg, #C9A84C, #D4AF37)', label: 'Eid Gold' },
+  sahur:      { gradient: 'linear-gradient(90deg, #1e3a5f, #2563eb)', label: 'Sahur' },
+  cool:       { gradient: 'linear-gradient(90deg, #3b82f6, #06b6d4)', label: 'Cool' },
+  vibrant:    { gradient: 'linear-gradient(90deg, #f472b6, #fb923c)', label: 'Vibrant' },
 };
 
-export function TextOverlayNode({ data, selected }: NodeProps<Node<TextOverlayData>>) {
+export function ColorFilterNode({ data, selected }: NodeProps<Node<ColorFilterData>>) {
   const { config } = data;
   const nodeId = useNodeId();
   const { getNodeState } = useExecutionContext();
@@ -21,35 +24,32 @@ export function TextOverlayNode({ data, selected }: NodeProps<Node<TextOverlayDa
   const isDone = execState?.status === 'done';
   const outputImage = isDone ? (execState?.output?.type === 'image' ? (execState.output.data as ImageData) : null) : null;
 
-  const preview = config.text
-    ? config.text.length > 24 ? `${config.text.slice(0, 24)}…` : config.text
-    : 'Text from input';
-  const pos = POSITION_MAP[config.position] ?? POSITION_MAP.bottom;
+  const meta = FILTER_META[config.preset] ?? FILTER_META.none;
 
   return (
     <CompactNode
-      nodeType="textOverlay"
-      icon=""
+      nodeType="colorFilter"
+      icon="🌈"
       title={data.label}
       selected={selected}
     >
-      {/* Miniature position preview */}
-      <div className="relative w-full h-14 rounded-md bg-white/5 border border-white/10 overflow-hidden mb-2">
-        <div className="absolute inset-2 rounded bg-white/5" />
-        <div
-          className="absolute text-[8px] font-bold px-1 py-px rounded text-white"
-          style={{ ...pos, backgroundColor: `${config.fontColor}80`, color: config.fontColor, whiteSpace: 'nowrap', maxWidth: '90%', overflow: 'hidden', textOverflow: 'ellipsis' }}
-        >
-          {preview}
+      {/* Filter gradient preview */}
+      <div
+        className="w-full h-5 rounded-md mb-2"
+        style={{ background: meta.gradient, opacity: 0.3 + (config.intensity / 100) * 0.7 }}
+      />
+      {/* Intensity bar */}
+      <div className="mb-1.5">
+        <div className="h-1.5 rounded-full bg-white/8 overflow-hidden">
+          <div
+            className="h-full rounded-full"
+            style={{ width: `${config.intensity}%`, background: meta.gradient }}
+          />
         </div>
       </div>
-      {/* Meta */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <span className="text-[9px] px-1.5 py-px rounded bg-[#f59e0b]/20 text-[#f59e0b]">{config.position}</span>
-        <span className="text-[9px] text-white/30">{config.font}</span>
-        {config.effect !== 'none' && (
-          <span className="text-[9px] px-1.5 py-px rounded bg-white/8 text-white/40">{config.effect}</span>
-        )}
+      <div className="flex items-center gap-1.5">
+        <span className="text-[9px] font-semibold px-1.5 py-px rounded bg-[#f59e0b]/20 text-[#f59e0b]">{meta.label}</span>
+        <span className="text-[9px] text-white/30 ml-auto">{config.intensity}%</span>
       </div>
     
       {/* ── Output preview ──────────────────────────────── */}

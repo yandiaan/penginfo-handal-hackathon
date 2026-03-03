@@ -85,6 +85,13 @@ export const NODE_TYPE_CONFIGS: NodeTypeConfig[] = [
     icon: '📋',
     description: 'Start from a pre-built template',
   },
+  {
+    type: 'colorPalette',
+    category: 'input',
+    label: 'Color Palette',
+    icon: '🎨',
+    description: 'Define or extract a color palette for styling',
+  },
   // Transform nodes
   {
     type: 'promptEnhancer',
@@ -99,6 +106,34 @@ export const NODE_TYPE_CONFIGS: NodeTypeConfig[] = [
     label: 'Style Config',
     icon: '🎭',
     description: 'Configure art style, mood, and cultural theme',
+  },
+  {
+    type: 'imageToText',
+    category: 'transform',
+    label: 'Image to Text',
+    icon: '🔍',
+    description: 'Describe an image using AI (Qwen VL)',
+  },
+  {
+    type: 'translateText',
+    category: 'transform',
+    label: 'Translate Text',
+    icon: '🌐',
+    description: 'Translate text between languages',
+  },
+  {
+    type: 'backgroundRemover',
+    category: 'transform',
+    label: 'Background Remover',
+    icon: '✂️',
+    description: 'Remove or replace image background with AI',
+  },
+  {
+    type: 'faceCrop',
+    category: 'transform',
+    label: 'Face Crop',
+    icon: '👤',
+    description: 'Auto-detect and crop face from image',
   },
   // Generate nodes
   {
@@ -115,6 +150,20 @@ export const NODE_TYPE_CONFIGS: NodeTypeConfig[] = [
     icon: '🎬',
     description: 'Generate short videos with AI (Wan)',
   },
+  {
+    type: 'inpainting',
+    category: 'generate',
+    label: 'Inpainting',
+    icon: '🪄',
+    description: 'Erase and regenerate parts of an image with AI',
+  },
+  {
+    type: 'imageUpscaler',
+    category: 'generate',
+    label: 'Image Upscaler',
+    icon: '🔬',
+    description: 'Upscale image to 2× or 4× resolution with AI',
+  },
   // Compose nodes
   {
     type: 'textOverlay',
@@ -122,6 +171,34 @@ export const NODE_TYPE_CONFIGS: NodeTypeConfig[] = [
     label: 'Text Overlay',
     icon: '🔤',
     description: 'Add styled text on top of images',
+  },
+  {
+    type: 'frameBorder',
+    category: 'compose',
+    label: 'Frame Border',
+    icon: '🖼️',
+    description: 'Add decorative frame or border to image',
+  },
+  {
+    type: 'stickerLayer',
+    category: 'compose',
+    label: 'Sticker Layer',
+    icon: '⭐',
+    description: 'Add emoji stickers on top of images',
+  },
+  {
+    type: 'colorFilter',
+    category: 'compose',
+    label: 'Color Filter',
+    icon: '🌈',
+    description: 'Apply color grading filters to images',
+  },
+  {
+    type: 'collageLayout',
+    category: 'compose',
+    label: 'Collage Layout',
+    icon: '📐',
+    description: 'Combine multiple images into a collage',
   },
   // Output nodes
   {
@@ -137,6 +214,13 @@ export const NODE_TYPE_CONFIGS: NodeTypeConfig[] = [
     label: 'Export',
     icon: '💾',
     description: 'Export and share your creation',
+  },
+  {
+    type: 'watermark',
+    category: 'output',
+    label: 'Watermark',
+    icon: '©️',
+    description: 'Add text or logo watermark to media',
   },
 ];
 

@@ -1,17 +1,26 @@
 import { useNodeId } from '@xyflow/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import { CompactNode } from '../CompactNode';
-import type { PromptEnhancerData } from '../../types/node-types';
+import type { TranslateTextData } from '../../types/node-types';
 import type { TextData } from '../../types/port-types';
 import { useExecutionContext } from '../../execution/ExecutionContext';
 
-const CREATIVITY_STEPS = ['precise', 'balanced', 'creative'] as const;
-const TONE_COLORS: Record<string, string> = {
-  formal: '#60a5fa', casual: '#4ade80', funny: '#fb923c', heartfelt: '#f472b6',
+const LANG_FLAGS: Record<string, string> = {
+  auto: '🌐',
+  id: '🇮🇩',
+  en: '🇬🇧',
+  ar: '🇸🇦',
+  zh: '🇨🇳',
 };
-const LANG_FLAG: Record<string, string> = { id: '🇮🇩', en: '🇬🇧', mixed: '🌐' };
+const LANG_NAMES: Record<string, string> = {
+  auto: 'Auto',
+  id: 'Indonesian',
+  en: 'English',
+  ar: 'Arabic',
+  zh: 'Chinese',
+};
 
-export function PromptEnhancerNode({ data, selected }: NodeProps<Node<PromptEnhancerData>>) {
+export function TranslateTextNode({ data, selected }: NodeProps<Node<TranslateTextData>>) {
   const { config } = data;
   const nodeId = useNodeId();
   const { getNodeState } = useExecutionContext();
@@ -20,38 +29,27 @@ export function PromptEnhancerNode({ data, selected }: NodeProps<Node<PromptEnha
   const isDone = execState?.status === 'done';
   const outputText = isDone ? (execState?.output?.type === 'text' ? (execState.output.data as TextData).text : null) : null;
 
-  const creativeIdx = CREATIVITY_STEPS.indexOf(config.creativity as (typeof CREATIVITY_STEPS)[number]);
-  const toneColor = TONE_COLORS[config.tone] ?? '#a78bfa';
 
   return (
-    <CompactNode nodeType="promptEnhancer" icon="" title={data.label} selected={selected}>
-      {/* Creativity bar */}
-      <div className="mb-2.5">
-        <div className="flex justify-between text-[9px] text-white/25 mb-1.5">
-          <span>Precise</span><span>Balanced</span><span>Creative</span>
+    <CompactNode
+      nodeType="translateText"
+      icon="🌐"
+      title={data.label}
+      selected={selected}
+    >
+      {/* Big language arrow */}
+      <div className="flex items-center justify-center gap-2 py-1">
+        <div className="flex flex-col items-center gap-0.5">
+          <span className="text-[18px]">{LANG_FLAGS[config.sourceLang]}</span>
+          <span className="text-[9px] text-white/35">{LANG_NAMES[config.sourceLang]}</span>
         </div>
-        <div className="flex gap-1">
-          {CREATIVITY_STEPS.map((step, i) => (
-            <div
-              key={step}
-              className="flex-1 h-1.5 rounded-full"
-              style={{ backgroundColor: i <= creativeIdx ? '#a78bfa' : 'rgba(167,139,250,0.12)' }}
-            />
-          ))}
+        <svg width="28" height="12" viewBox="0 0 28 12">
+          <path d="M2 6 H20 M18 2 L25 6 L18 10" stroke="rgba(167,139,250,0.5)" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        <div className="flex flex-col items-center gap-0.5">
+          <span className="text-[18px]">{LANG_FLAGS[config.targetLang]}</span>
+          <span className="text-[9px] text-white/35">{LANG_NAMES[config.targetLang]}</span>
         </div>
-      </div>
-      {/* Tag row */}
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <span
-          className="text-[9px] font-semibold px-1.5 py-px rounded-full border"
-          style={{ color: toneColor, borderColor: toneColor + '40', backgroundColor: toneColor + '15' }}
-        >
-          {config.tone}
-        </span>
-        <span className="text-[9px] px-1.5 py-px rounded-full text-white/40" style={{ background: 'rgba(255,255,255,0.06)' }}>
-          {config.contentType}
-        </span>
-        <span className="text-[11px] ml-auto" title={config.language}>{LANG_FLAG[config.language] ?? config.language}</span>
       </div>
     
       {/* ── Output preview ──────────────────────────────── */}
