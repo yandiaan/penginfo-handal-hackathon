@@ -395,7 +395,7 @@ router.post('/translate-text/run', async (req, res, next) => {
     const tgtLabel = LANG_NAMES[config.targetLang] || config.targetLang;
 
     const translated = await generateText({
-      model: 'qwen-turbo',
+      model: 'qwen-flash',
       messages: [
         {
           role: 'system',
@@ -1041,7 +1041,7 @@ router.post('/object-remover/run', async (req, res, next) => {
     const urls = await editImage({
       images: [imageUrl],
       text: instruction,
-      model: 'qwen-image-edit-max',
+      model: 'qwen-image-edit-plus',
     });
 
     const resultUrl = urls[0];

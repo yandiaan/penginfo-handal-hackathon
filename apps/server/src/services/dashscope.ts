@@ -205,7 +205,7 @@ function getAuthHeaders() {
 export async function generateText(params: TextGenerationParams): Promise<string> {
   const client = createClient();
   const completion = await client.chat.completions.create({
-    model: params.model || 'qwen2.5-vl-3b-instruct',
+    model: params.model || 'qwen-flash',
     messages: params.messages,
     temperature: params.temperature ?? 0.7,
     max_tokens: params.max_tokens ?? 1500,
@@ -260,7 +260,7 @@ export async function describeImage(params: DescribeImageParams): Promise<string
  */
 export async function generateImage(params: ImageGenerationParams): Promise<string> {
   const body = {
-    model: params.model || 'wan2.2-t2i-flash',
+    model: params.model || 'wan2.1-t2i-turbo',
     input: {
       prompt: params.prompt,
     },
@@ -307,7 +307,7 @@ export async function editImage(params: ImageEditParams): Promise<string[]> {
   content.push({ text: params.text });
 
   const body = {
-    model: params.model || 'qwen-image-edit-max',
+    model: params.model || 'qwen-image-edit-plus',
     input: {
       messages: [
         {
@@ -355,7 +355,7 @@ export async function editImage(params: ImageEditParams): Promise<string[]> {
  */
 export async function generateVideo(params: TextToVideoParams): Promise<string> {
   const body = {
-    model: params.model || 'wan2.2-t2v-plus',
+    model: params.model || 'wan2.1-t2v-turbo',
     input: {
       prompt: params.prompt,
       ...(params.audio_url && { audio_url: params.audio_url }),
@@ -399,7 +399,7 @@ export async function generateVideo(params: TextToVideoParams): Promise<string> 
  */
 export async function generateVideoFromImage(params: ImageToVideoParams): Promise<string> {
   const body = {
-    model: params.model || 'wan2.6-i2v-flash',
+    model: params.model || 'wan2.1-i2v-turbo',
     input: {
       prompt: params.prompt,
       img_url: params.img_url,
