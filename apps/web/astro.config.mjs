@@ -17,9 +17,6 @@ export default defineConfig({
         '@': path.resolve('./src'),
       },
     },
-    optimizeDeps: {
-      include: ['tslib'],
-    },
   },
 
   integrations: [react()],
