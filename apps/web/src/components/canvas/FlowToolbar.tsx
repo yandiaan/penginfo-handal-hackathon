@@ -11,7 +11,6 @@ import type { MouseMode } from './types';
 import {
   ChevronDown,
   ChevronRight,
-  Clock,
   Hand,
   Loader2,
   MousePointer2,
@@ -22,7 +21,6 @@ import {
   X,
   ArrowRight,
   ArrowLeft,
-  Cpu,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import type { NodeCategory } from './types/node-types';
@@ -153,50 +151,6 @@ function formatPortType(type: string): string {
   }
 }
 
-// Helper to get estimated processing time based on node type
-function getProcessingTime(nodeType: CustomNodeType): string {
-  switch (nodeType) {
-    case 'imageGenerator':
-    case 'videoGenerator':
-      return '~5-15s';
-    case 'inpainting':
-    case 'styleTransfer':
-    case 'backgroundReplacer':
-      return '~3-8s';
-    case 'imageUpscaler':
-    case 'backgroundRemover':
-    case 'objectRemover':
-      return '~2-5s';
-    case 'promptEnhancer':
-    case 'translateText':
-    case 'imageToText':
-      return '~1-3s';
-    default:
-      return '~1s';
-  }
-}
-
-// Helper to get compute units based on node type
-function getComputeUnits(nodeType: CustomNodeType): string {
-  switch (nodeType) {
-    case 'videoGenerator':
-      return '~8 CU';
-    case 'imageGenerator':
-    case 'inpainting':
-      return '~4 CU';
-    case 'styleTransfer':
-    case 'backgroundReplacer':
-    case 'imageUpscaler':
-      return '~3 CU';
-    case 'backgroundRemover':
-    case 'objectRemover':
-    case 'faceCrop':
-      return '~2 CU';
-    default:
-      return '~1 CU';
-  }
-}
-
 // Node Detail Popover Component
 interface NodeDetailPopoverProps {
   node: NodeTypeConfig | null;
@@ -211,8 +165,6 @@ function NodeDetailPopover({ node, category, visible, position }: NodeDetailPopo
   const categoryConfig = NODE_CATEGORIES[category];
   const portSchema = NODE_PORT_SCHEMAS[node.type];
   const isRunnable = RUNNABLE_NODE_TYPES.includes(node.type);
-  const processingTime = getProcessingTime(node.type);
-  const computeUnits = getComputeUnits(node.type);
 
   const inputCount = portSchema?.inputs?.length || 0;
   const outputCount = portSchema?.outputs?.length || 0;
@@ -282,24 +234,6 @@ function NodeDetailPopover({ node, category, visible, position }: NodeDetailPopo
       {/* Stats Grid */}
       <div className="px-4 pb-4">
         <div className="grid grid-cols-2 gap-2">
-          {/* Processing Time */}
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/8">
-            <Clock size={14} className="text-white/40" />
-            <div>
-              <div className="text-[10px] text-white/40 uppercase tracking-wider">Time</div>
-              <div className="text-[12px] font-medium text-white/80">{processingTime}</div>
-            </div>
-          </div>
-
-          {/* Compute Units */}
-          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/8">
-            <Cpu size={14} className="text-white/40" />
-            <div>
-              <div className="text-[10px] text-white/40 uppercase tracking-wider">Compute</div>
-              <div className="text-[12px] font-medium text-white/80">{computeUnits}</div>
-            </div>
-          </div>
-
           {/* Inputs */}
           <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white/[0.04] border border-white/8">
             <ArrowLeft size={14} className="text-white/40" />
@@ -439,6 +373,13 @@ export function FlowToolbar({
 
   const closeMenu = () => {
     setMenuOpen(false);
+    setShowNodeDetail(false);
+    setHoveredNode(null);
+    setHoveredNodeCategory(null);
+    if (nodeDetailTimerRef.current) {
+      window.clearTimeout(nodeDetailTimerRef.current);
+      nodeDetailTimerRef.current = null;
+    }
     closeTimerRef.current = window.setTimeout(() => {
       setMenuMounted(false);
       setSearchQuery('');
