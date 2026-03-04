@@ -19,17 +19,6 @@ ADIS AI provides a visual pipeline editor that enables users to create complex c
 - **Real-time Execution Feedback**: Live progress updates and logging during pipeline execution
 - **Indonesian Cultural Context**: Specialized templates and content generation for Indonesian cultural events and celebrations
 
-## Technology Stack
-
-| Category | Technologies |
-|----------|-------------|
-| Framework | Astro 5.x with React 19 integration |
-| UI Library | React 19, Tailwind CSS 4.x |
-| Canvas Engine | @xyflow/react (React Flow) 12.x |
-| Animations | GSAP 3.x |
-| Icons | Lucide React |
-| Deployment | Vercel (via @astrojs/vercel) |
-
 ## Node Categories
 
 The pipeline editor supports five distinct node categories:
@@ -41,33 +30,6 @@ The pipeline editor supports five distinct node categories:
 | **Generate** | AI-powered content creation (Image Generator, Video Generator, Background Remover, Inpainting) | Blue |
 | **Compose** | Layout and composition tools (Text Overlay, Frame Border, Sticker Layer, Collage Layout) | Orange |
 | **Output** | Final output nodes (Preview, Export) | Red |
-
-## Project Structure
-
-```
-apps/web/
-├── public/                    # Static assets (logos, SVGs, screenshots)
-├── src/
-│   ├── components/
-│   │   ├── canvas/           # React Flow canvas components
-│   │   │   ├── config/       # Node categories, model options, port configuration
-│   │   │   ├── drawer/       # Node detail panel components
-│   │   │   ├── execution/    # Pipeline execution engine
-│   │   │   ├── hooks/        # Custom React hooks
-│   │   │   ├── nodes/        # Node component implementations
-│   │   │   ├── services/     # API service layer
-│   │   │   ├── templates/    # Pre-built workflow templates
-│   │   │   └── types/        # TypeScript type definitions
-│   │   ├── landing/          # Landing page components
-│   │   ├── layout/           # Application layout components
-│   │   ├── templates/        # Template gallery components
-│   │   └── ui/               # Reusable UI components
-│   ├── layouts/              # Astro layout templates
-│   ├── lib/                  # Utility functions
-│   ├── pages/                # Astro page routes
-│   └── styles/               # Global CSS and animations
-└── package.json
-```
 
 ## Getting Started
 
