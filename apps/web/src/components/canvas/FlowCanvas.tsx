@@ -13,6 +13,7 @@ import {
   type OnConnectEnd,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { Toaster } from 'sonner';
 import { useFlowNodes } from './hooks/useFlowNodes';
 import { useMouseMode } from './hooks/useMouseMode';
 import { useTemplateLoader } from './hooks/useTemplateLoader';
@@ -149,6 +150,7 @@ export function FlowCanvasInner() {
         y: connectMenu.clientY - 20,
       });
       const newId = addNodeAtPosition(nodeType, flowPos);
+      if (!newId) return; // blocked by canvas limit
 
       // Auto-wire the edge
       if (connectMenu.direction === 'source') {
@@ -247,6 +249,8 @@ export function FlowCanvasInner() {
             onClose={() => setConnectMenu(null)}
           />
         )}
+
+        <Toaster position="top-right" richColors />
       </div>
     </ExecutionContext.Provider>
   );

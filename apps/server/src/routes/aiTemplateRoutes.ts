@@ -1,7 +1,7 @@
 import { Router, type Router as RouterType } from 'express';
 import { z } from 'zod';
 import { generateText } from '@/services/ai-service';
-import { validateTemplate, buildRetryPrompt } from '@/utils/templateValidator';
+import { validateTemplate, buildRetryPrompt, sanitizeEdges } from '@/utils/templateValidator';
 
 const router: RouterType = Router();
 
@@ -102,6 +102,22 @@ CRITICAL HANDLE ID RULES — the handle IDs are NOT the same as port types:
 ✓ CORRECT:   { source: "txt1", target: "gen1", sourceHandle: "text",   targetHandle: "prompt" }
 ✗ INCORRECT: { source: "txt1", target: "gen1", sourceHandle: "text",   targetHandle: "text" }
 
+✗ promptEnhancer INPUT handle is "text" (not "prompt") — when wiring INTO promptEnhancer, targetHandle MUST be "text"
+✓ CORRECT:   { source: "txt1", target: "enh1", sourceHandle: "text",   targetHandle: "text" }
+✗ INCORRECT: { source: "txt1", target: "enh1", sourceHandle: "text",   targetHandle: "prompt" }
+  (the "prompt" name is ONLY for promptEnhancer's OUTPUT, never its input)
+
+✗ preview and export ONLY accept "media" — targetHandle MUST be "media", NEVER "image" or "video"
+✓ CORRECT:   { source: "gen1", target: "prv1", sourceHandle: "image",  targetHandle: "media" }
+✗ INCORRECT: { source: "gen1", target: "prv1", sourceHandle: "image",  targetHandle: "image" }
+
+✗ collageLayout inputs are "image1", "image2", "image3", "image4" — NEVER just "image"
+✓ CORRECT:   { source: "gen1", target: "col1", sourceHandle: "image",  targetHandle: "image1" }
+✗ INCORRECT: { source: "gen1", target: "col1", sourceHandle: "image",  targetHandle: "image" }
+
+✗ backgroundReplacer's second image input is "bgImage" — NEVER "background" or "bg"
+✗ styleTransfer's style image input is "styleImage" — NEVER "style" or "reference"
+
 ═══════════════════════════════════════════════════════
 NODE CATALOG — inputs → outputs with exact handle IDs
 ═══════════════════════════════════════════════════════
@@ -138,7 +154,10 @@ promptEnhancer
   inputs: text→"text" (required), style→"style" (optional)
   outputs: text→"prompt"
   → Enrich a raw prompt into a vivid AI prompt
-  ⚠ Output handle is "prompt" (not "text") — use "prompt" in sourceHandle
+  ⚠ INPUT handle for text is "text" — use targetHandle: "text" when wiring INTO this node
+  ⚠ OUTPUT handle is "prompt" — use sourceHandle: "prompt" when wiring OUT of this node
+  ✓ textPrompt→promptEnhancer: sourceHandle: "text", targetHandle: "text"
+  ✓ promptEnhancer→imageGenerator: sourceHandle: "prompt", targetHandle: "prompt"
 
 imageToText
   inputs: image→"image" (required)
@@ -574,37 +593,7 @@ router.post('/generate-template', async (req, res) => {
         return node;
       });
 
-      const VIDEO_OUT = new Set([
-        'videoGenerator',
-        'videoExtension',
-        'videoRepainting',
-        'videoUpload',
-      ]);
-      const IMAGE_ONLY = new Set([
-        'colorFilter',
-        'stickerLayer',
-        'frameBorder',
-        'textOverlay',
-        'collageLayout',
-        'backgroundRemover',
-        'faceCrop',
-        'objectRemover',
-        'backgroundReplacer',
-        'styleTransfer',
-        'inpainting',
-        'imageUpscaler',
-        'imageToText',
-      ]);
-      const nodeTypeMap = new Map(injectedNodes.map((n) => [n.id, n.type]));
-      const sanitizedEdges = template.edges.filter((edge) => {
-        const st = nodeTypeMap.get(edge.source);
-        const tt = nodeTypeMap.get(edge.target);
-        if (st && VIDEO_OUT.has(st) && tt && IMAGE_ONLY.has(tt)) {
-          console.warn(`[aiTemplateRoutes] Stripped invalid edge ${edge.id}: ${st}→${tt}`);
-          return false;
-        }
-        return true;
-      });
+      const sanitizedEdges = sanitizeEdges(injectedNodes, template.edges);
 
       sendResult({ ...template, nodes: injectedNodes, edges: sanitizedEdges });
       return;

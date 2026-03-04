@@ -4,6 +4,8 @@ import {
   generateText,
   describeImage,
   generateImage,
+  generateImageWithQwen,
+  isQwenImageGenerationModel,
   editImage,
   generateVideo,
   generateVideoFromImage,
@@ -176,18 +178,35 @@ router.post('/image-generator/run', async (req, res, next) => {
         duration_ms: Date.now() - startTime,
       });
     } else {
-      // Text-to-image mode — async task
-      const taskId = await generateImage({
-        model: config.model,
-        prompt: promptData.prompt,
-        negative_prompt: promptData.negativePrompt,
-        size,
-        prompt_extend: config.prompt_extend,
-        seed: config.seed ?? undefined,
-      });
+      // Text-to-image mode: route to correct endpoint based on model
+      const model = config.model || 'wan2.1-t2i-turbo';
+      let imageUrl: string;
 
-      const urls = await pollTask(taskId);
-      const imageUrl = urls[0];
+      if (isQwenImageGenerationModel(model)) {
+        // Qwen image models use the DashScope multimodal-generation sync endpoint
+        const urls = await generateImageWithQwen({
+          model,
+          prompt: promptData.prompt,
+          negative_prompt: promptData.negativePrompt,
+          size,
+          prompt_extend: config.prompt_extend,
+          seed: config.seed ?? undefined,
+        });
+        imageUrl = urls[0] ?? '';
+      } else {
+        // Wan models use the DashScope async task endpoint
+        const taskId = await generateImage({
+          model,
+          prompt: promptData.prompt,
+          negative_prompt: promptData.negativePrompt,
+          size,
+          prompt_extend: config.prompt_extend,
+          seed: config.seed ?? undefined,
+        });
+        const urls = await pollTask(taskId);
+        imageUrl = urls[0] ?? '';
+      }
+
       if (!imageUrl) throw new Error('No image generated');
 
       const [w, h] = size.split('*').map(Number);

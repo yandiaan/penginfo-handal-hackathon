@@ -33,7 +33,7 @@ export async function describeImage(params: {
 }
 
 /**
- * Generate image using Qwen-Image or Wan model.
+ * Generate image using Wan model (DashScope async task).
  * Returns a task ID for polling.
  */
 export async function generateImage(params: {
@@ -48,6 +48,25 @@ export async function generateImage(params: {
 }): Promise<string> {
   return dashscope.generateImage(params);
 }
+
+/**
+ * Generate image using Qwen image models via DashScope multimodal-generation endpoint.
+ * Synchronous — returns image URLs directly (no polling needed).
+ */
+export async function generateImageWithQwen(params: {
+  model?: string;
+  prompt: string;
+  negative_prompt?: string;
+  size?: string;
+  n?: number;
+  prompt_extend?: boolean;
+  watermark?: boolean;
+  seed?: number;
+}): Promise<string[]> {
+  return dashscope.generateImageWithQwen(params);
+}
+
+export const isQwenImageGenerationModel = dashscope.isQwenImageGenerationModel;
 
 /**
  * Edit images using Qwen-Image-Edit model.

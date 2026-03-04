@@ -25,6 +25,38 @@ interface TemplateEdge {
   targetHandle?: string;
 }
 
+// ─── Port handle registry (mirrors NODE_PORT_SCHEMAS on the frontend) ─────────
+// inputs: valid targetHandle values; outputs: valid sourceHandle values
+
+const NODE_HANDLES: Record<string, { inputs: string[]; outputs: string[] }> = {
+  textPrompt:        { inputs: [],                                    outputs: ['text'] },
+  imageUpload:       { inputs: [],                                    outputs: ['image'] },
+  videoUpload:       { inputs: [],                                    outputs: ['video'] },
+  templatePreset:    { inputs: [],                                    outputs: ['text', 'style'] },
+  promptEnhancer:    { inputs: ['text', 'style'],                     outputs: ['prompt'] },
+  styleConfig:       { inputs: [],                                    outputs: ['style'] },
+  imageGenerator:    { inputs: ['prompt', 'style', 'image'],          outputs: ['image'] },
+  videoGenerator:    { inputs: ['prompt', 'style', 'image', 'lastFrame'], outputs: ['video'] },
+  imageToText:       { inputs: ['image'],                             outputs: ['text'] },
+  translateText:     { inputs: ['text'],                              outputs: ['text'] },
+  backgroundRemover: { inputs: ['image'],                             outputs: ['image'] },
+  faceCrop:          { inputs: ['image'],                             outputs: ['image'] },
+  objectRemover:     { inputs: ['image'],                             outputs: ['image'] },
+  backgroundReplacer:{ inputs: ['image', 'bgImage'],                  outputs: ['image'] },
+  styleTransfer:     { inputs: ['image', 'styleImage'],               outputs: ['image'] },
+  videoRepainting:   { inputs: ['prompt', 'video', 'image'],          outputs: ['video'] },
+  videoExtension:    { inputs: ['prompt', 'video', 'image'],          outputs: ['video'] },
+  inpainting:        { inputs: ['image', 'prompt'],                   outputs: ['image'] },
+  imageUpscaler:     { inputs: ['image'],                             outputs: ['image'] },
+  textOverlay:       { inputs: ['image', 'text'],                     outputs: ['image'] },
+  frameBorder:       { inputs: ['image'],                             outputs: ['image'] },
+  stickerLayer:      { inputs: ['image'],                             outputs: ['image'] },
+  colorFilter:       { inputs: ['image'],                             outputs: ['image'] },
+  collageLayout:     { inputs: ['image1', 'image2', 'image3', 'image4'], outputs: ['image'] },
+  preview:           { inputs: ['media'],                             outputs: ['media'] },
+  export:            { inputs: ['media'],                             outputs: [] },
+};
+
 // Nodes whose primary output is video
 const VIDEO_OUTPUT_TYPES = new Set([
   'videoGenerator',
@@ -88,8 +120,26 @@ export function validateTemplate(template: {
 
     const srcType = nodeMap.get(edge.source)!;
     const tgtType = nodeMap.get(edge.target)!;
+    const srcHandles = NODE_HANDLES[srcType];
+    const tgtHandles = NODE_HANDLES[tgtType];
 
-    // 2. Video output → image-only node = INVALID
+    // 2. sourceHandle must exist on the source node's outputs
+    if (edge.sourceHandle && srcHandles && !srcHandles.outputs.includes(edge.sourceHandle)) {
+      errors.push({
+        ref: edge.id,
+        message: `INVALID sourceHandle: "${srcType}" has no output handle "${edge.sourceHandle}". Valid outputs are: [${srcHandles.outputs.join(', ')}].`,
+      });
+    }
+
+    // 3. targetHandle must exist on the target node's inputs
+    if (edge.targetHandle && tgtHandles && !tgtHandles.inputs.includes(edge.targetHandle)) {
+      errors.push({
+        ref: edge.id,
+        message: `INVALID targetHandle: "${tgtType}" has no input handle "${edge.targetHandle}". Valid inputs are: [${tgtHandles.inputs.join(', ')}]. Common mistake: preview/export require "media", not "image" or "video". collageLayout requires "image1"/"image2", not "image".`,
+      });
+    }
+
+    // 4. Video output → image-only node = INVALID
     if (VIDEO_OUTPUT_TYPES.has(srcType) && IMAGE_ONLY_INPUT_TYPES.has(tgtType)) {
       errors.push({
         ref: edge.id,
@@ -97,7 +147,7 @@ export function validateTemplate(template: {
       });
     }
 
-    // 3. Image output → videoRepainting "video" port = INVALID
+    // 5. Image output → videoRepainting "video" port = INVALID
     if (IMAGE_OUTPUT_TYPES.has(srcType) && tgtType === 'videoRepainting' && edge.targetHandle === 'video') {
       errors.push({
         ref: edge.id,
@@ -105,7 +155,7 @@ export function validateTemplate(template: {
       });
     }
 
-    // 4. promptEnhancer output handle must be "prompt"
+    // 6. promptEnhancer output handle must be "prompt"
     if (srcType === 'promptEnhancer' && edge.sourceHandle && edge.sourceHandle !== 'prompt') {
       errors.push({
         ref: edge.id,
@@ -113,7 +163,7 @@ export function validateTemplate(template: {
       });
     }
 
-    // 5. imageGenerator / videoGenerator text input handle must be "prompt", not "text"
+    // 7. imageGenerator / videoGenerator / inpainting text input handle must be "prompt", not "text"
     if (
       (tgtType === 'imageGenerator' || tgtType === 'videoGenerator' || tgtType === 'inpainting') &&
       edge.targetHandle === 'text'
@@ -125,7 +175,7 @@ export function validateTemplate(template: {
     }
   }
 
-  // 5. Every pipeline must end with at least one output node
+  // 8. Every pipeline must end with at least one output node
   const hasOutput = template.nodes.some((n) => n.type === 'preview' || n.type === 'export');
   if (!hasOutput) {
     errors.push({
@@ -150,3 +200,29 @@ ${errorLines}
 
 Regenerate the COMPLETE pipeline JSON fixing every error above. Do NOT repeat the same mistakes.`;
 }
+
+/**
+ * Strip edges that have invalid handle IDs (not present in NODE_HANDLES).
+ * Used as a last-resort sanitizer when max retry attempts are exhausted.
+ */
+export function sanitizeEdges(
+  nodes: TemplateNode[],
+  edges: TemplateEdge[],
+): TemplateEdge[] {
+  const nodeMap = new Map<string, string>(nodes.map((n) => [n.id, n.type]));
+  return edges.filter((edge) => {
+    const srcType = nodeMap.get(edge.source);
+    const tgtType = nodeMap.get(edge.target);
+    if (!srcType || !tgtType) return false;
+
+    const srcHandles = NODE_HANDLES[srcType];
+    const tgtHandles = NODE_HANDLES[tgtType];
+
+    if (edge.sourceHandle && srcHandles && !srcHandles.outputs.includes(edge.sourceHandle)) return false;
+    if (edge.targetHandle && tgtHandles && !tgtHandles.inputs.includes(edge.targetHandle)) return false;
+    if (VIDEO_OUTPUT_TYPES.has(srcType) && IMAGE_ONLY_INPUT_TYPES.has(tgtType)) return false;
+
+    return true;
+  });
+}
+

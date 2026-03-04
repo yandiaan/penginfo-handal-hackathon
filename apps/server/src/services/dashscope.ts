@@ -269,11 +269,82 @@ export async function describeImage(params: DescribeImageParams): Promise<string
   return completion.choices[0]?.message?.content || '';
 }
 
-// ─── Image Generation (async task) ───────────────────────────────────────────
+// ─── Image Generation ────────────────────────────────────────────────────────
 
 /**
- * Submit text-to-image generation task.
- * Supports Qwen-Image and Wan models.
+ * Models that use the multimodal-generation endpoint (synchronous).
+ * These use a messages-based request format, same endpoint as editImage.
+ * All other image generation models use the DashScope async task API.
+ */
+const QWEN_IMAGE_GENERATION_MODELS = ['qwen-image-plus', 'qwen-image-max'];
+
+export function isQwenImageGenerationModel(model: string): boolean {
+  return QWEN_IMAGE_GENERATION_MODELS.includes(model);
+}
+
+/**
+ * Map app dimension sizes to valid qwen-image-max/plus sizes.
+ * qwen-image-max and qwen-image-plus only support specific resolutions.
+ */
+function mapSizeForQwenImage(size: string): string {
+  const sizeMap: Record<string, string> = {
+    '1024*1024': '1328*1328', // 1:1
+    '768*1024': '1104*1472', // 3:4 portrait
+    '1024*768': '1472*1104', // 4:3 landscape
+    '576*1024': '928*1664', // 9:16 story
+  };
+  return sizeMap[size] ?? '1328*1328';
+}
+
+/**
+ * Generate image using Qwen image models via DashScope multimodal-generation endpoint.
+ * Synchronous — returns image URLs directly (no polling needed).
+ */
+export async function generateImageWithQwen(params: ImageGenerationParams): Promise<string[]> {
+  const size = mapSizeForQwenImage(params.size || '1024*1024');
+  const body = {
+    model: params.model || 'qwen-image-plus',
+    input: {
+      messages: [
+        {
+          role: 'user',
+          content: [{ text: params.prompt }],
+        },
+      ],
+    },
+    parameters: {
+      size,
+      prompt_extend: params.prompt_extend ?? true,
+      watermark: params.watermark ?? false,
+      ...(params.negative_prompt && { negative_prompt: params.negative_prompt }),
+      ...(params.seed != null && { seed: params.seed }),
+    },
+  };
+
+  const response = await fetch(
+    `${DASHSCOPE_API_BASE}/services/aigc/multimodal-generation/generation`,
+    {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(body),
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Image Generation API error (${response.status}): ${error}`);
+  }
+
+  const data = (await response.json()) as ImageEditResponse;
+  const choice = data.output.choices[0];
+  if (!choice) throw new Error('No output from image generation API');
+
+  return choice.message.content.filter((item) => item.image).map((item) => item.image!);
+}
+
+/**
+ * Submit text-to-image generation task (DashScope async).
+ * Supports Wan models only — use generateImageWithQwen for qwen-image-* models.
  * Returns a task ID for polling.
  */
 export async function generateImage(params: ImageGenerationParams): Promise<string> {
