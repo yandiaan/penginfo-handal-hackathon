@@ -4,7 +4,7 @@ A modular, node-based content generation engine designed to transform creative i
 
 This application leverages **Alibaba Cloud Qwen** - an advanced language model by Alibaba Cloud - as the core AI engine for text generation, prompt enhancement, and intelligent content reasoning. Combined with Alibaba's image and video generation capabilities, ADIS AI delivers a comprehensive solution for creating culturally-relevant Indonesian content.
 
-![ADIS AI Canvas Interface](public/screenshot-1.png)
+![ADIS AI Canvas Interface](apps/web/public/screenshot-1.png)
 
 ## Overview
 
