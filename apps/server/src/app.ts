@@ -7,6 +7,7 @@ import router from '@/routes';
 import nodeRoutes from '@/routes/nodeRoutes';
 import uploadRoutes from '@/routes/uploadRoutes';
 import pipelineRoutes from '@/routes/pipelineRoutes';
+import aiTemplateRoutes from '@/routes/aiTemplateRoutes';
 import { errorHandler } from '@/middleware/errorHandler';
 
 const app: Application = express();
@@ -40,6 +41,7 @@ app.use('/api', router);
 app.use('/api/node', nodeRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/pipeline', pipelineRoutes);
+app.use('/api/ai', aiTemplateRoutes);
 
 // Health check
 app.get('/health', (_req, res) => {

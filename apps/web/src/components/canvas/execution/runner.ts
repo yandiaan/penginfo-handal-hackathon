@@ -40,6 +40,15 @@ function nodeDataToOutput(
         timestamp,
       };
     }
+    case 'videoUpload': {
+      const url = config.previewUrl as string | null;
+      if (!url) return null;
+      return {
+        type: 'video',
+        data: { url, duration: 0, width: 0, height: 0 },
+        timestamp,
+      };
+    }
     case 'styleConfig':
       return {
         type: 'style',
@@ -335,6 +344,8 @@ async function executeNodeOnServer(
     promptEnhancer: 'prompt-enhancer',
     imageGenerator: 'image-generator',
     videoGenerator: 'video-generator',
+    videoRepainting: 'video-repainting',
+    videoExtension: 'video-extension',
     imageToText: 'image-to-text',
     translateText: 'translate-text',
     backgroundRemover: 'background-remover',
