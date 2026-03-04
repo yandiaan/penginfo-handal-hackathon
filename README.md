@@ -1,10 +1,12 @@
 # ADIS AI - Content Generator
 
-A modular, node-based content generation engine designed to transform creative ideas into high-quality visual content including stickers, memes, and personalized greetings. Built with Astro, React, and React Flow for an intuitive visual workflow experience.
+<p align="center">
+  <img src="apps/web/public/logo.svg" alt="ADIS AI Logo" width="100" />
+</p>
+
+A modular, node-based content generation engine designed to transform creative ideas into high-quality visual content including stickers, memes, and personalized greetings. Powered by **Alibaba Cloud AI** technologies for an intuitive visual workflow experience.
 
 This application leverages **Alibaba Cloud Qwen** - an advanced language model by Alibaba Cloud - as the core AI engine for text generation, prompt enhancement, and intelligent content reasoning. Combined with Alibaba's image and video generation capabilities, ADIS AI delivers a comprehensive solution for creating culturally-relevant Indonesian content.
-
-![ADIS AI Canvas Interface](apps/web/public/screenshot-1.png)
 
 ## Overview
 
@@ -12,7 +14,7 @@ ADIS AI provides a visual pipeline editor that enables users to create complex c
 
 ### Key Features
 
-- **Visual Node-Based Editor**: Create and manage content generation pipelines using an intuitive canvas interface powered by React Flow
+- **Visual Node-Based Editor**: Create and manage content generation pipelines using an intuitive canvas interface
 - **Typed Port System**: Connection validation ensures data compatibility between nodes with distinct port types (text, prompt, image, video, style, media)
 - **Pipeline Execution Engine**: Client-orchestrated execution with server-side AI processing, featuring topology sorting and state management
 - **Template Presets**: Quick-start workflows for common use cases including Ramadan Wishes, Holiday Memes, AI Pet, and Custom Avatar generation
@@ -42,9 +44,6 @@ The pipeline editor supports five distinct node categories:
 ### Installation
 
 ```bash
-# Navigate to the web application directory
-cd apps/web
-
 # Install dependencies (from monorepo root)
 pnpm install
 ```
@@ -66,16 +65,6 @@ pnpm build
 
 # Preview production build locally
 pnpm preview
-```
-
-### Linting
-
-```bash
-# Run ESLint
-pnpm lint
-
-# Run ESLint with auto-fix
-pnpm lint:fix
 ```
 
 ## Available Templates
@@ -158,10 +147,10 @@ Configuration of the active model can be adjusted in the application settings to
 
 ## Contributing
 
-1. Ensure all code follows the established ESLint configuration
-2. Maintain TypeScript strict mode compliance
+1. Follow established code quality standards
+2. Maintain type safety and proper error handling
 3. Follow the existing component structure and naming conventions
-4. Add appropriate type definitions for new features
+4. Add appropriate documentation for new features
 5. Test pipeline execution with various node configurations
 
 ## License
@@ -171,5 +160,5 @@ This project is proprietary software. All rights reserved.
 ## Acknowledgments
 
 - **Alibaba Cloud** - AI infrastructure and model services
-- **Qwen** - Text and reasoning capabilities
-- React Flow team for the excellent node-based UI library
+- **Qwen** - Advanced language model capabilities
+- Open source community for visualization libraries
