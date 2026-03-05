@@ -6,8 +6,13 @@ import { topologySort } from './topology';
 import { collectNodeInputs } from './inputCollector';
 import type { PipelineRunResult, NodeRunResponse } from './types';
 import type { NodeOutput } from '../types/port-types';
+import type { LogEntry } from './logStore';
+import { getFingerprint } from '../../../utils/fingerprint';
+import { getSessionStartMs } from '../../../utils/sessionContext';
 
 const API_BASE = 'http://localhost:3000/api/node';
+
+export type LogCallback = (entry: Omit<LogEntry, 'id' | 'timestamp'>) => void;
 
 /**
  * Convert a non-runnable node's data into a NodeOutput.
@@ -37,6 +42,15 @@ function nodeDataToOutput(
         timestamp,
       };
     }
+    case 'videoUpload': {
+      const url = config.previewUrl as string | null;
+      if (!url) return null;
+      return {
+        type: 'video',
+        data: { url, duration: 0, width: 0, height: 0 },
+        timestamp,
+      };
+    }
     case 'styleConfig':
       return {
         type: 'style',
@@ -54,6 +68,16 @@ function nodeDataToOutput(
         data: { text: `template:${config.template}:${config.locale}` },
         timestamp,
       };
+    case 'manualEditor': {
+      // ManualEditor stores composited image as exportDataUrl on node data (not inside config)
+      const exportUrl = (nodeData as Record<string, unknown>).exportDataUrl as string | null;
+      if (!exportUrl) return null;
+      return {
+        type: 'image',
+        data: { url: exportUrl, width: 0, height: 0 },
+        timestamp,
+      };
+    }
     default:
       return null;
   }
@@ -68,10 +92,19 @@ export async function runPipeline(
   nodes: Node[],
   edges: Edge[],
   store: ExecutionStore,
+  logger?: LogCallback,
 ): Promise<PipelineRunResult> {
   const runId = `run-${Date.now()}`;
   const startTime = Date.now();
   store.setPipelineRunning(true, runId);
+
+  logger?.({
+    level: 'info',
+    nodeId: null,
+    nodeType: null,
+    nodeLabel: null,
+    message: `Pipeline started (${nodes.length} nodes, ${edges.length} edges)`,
+  });
 
   // Local map to track outputs during this run (avoids stale React state reads)
   const outputMap = new Map<string, NodeOutput>();
@@ -89,9 +122,21 @@ export async function runPipeline(
         // Server-executed node
         store.setNodeState(nodeId, { status: 'running', progress: 0, error: null });
 
+        const nodeLabel = ((node.data as Record<string, unknown>).label as string) || nodeType;
+        logger?.({
+          level: 'info',
+          nodeId,
+          nodeType,
+          nodeLabel,
+          message: `Running node: ${nodeLabel}`,
+        });
+
         try {
           const inputs = collectNodeInputs(nodeId, edges, outputMap);
+          const nodeStart = Date.now();
           const response = await executeNodeOnServer(nodeType, node.data, inputs);
+          const durationMs = Date.now() - nodeStart;
+
           store.setNodeState(nodeId, {
             status: 'done',
             output: response.output,
@@ -99,12 +144,33 @@ export async function runPipeline(
             lastRunAt: Date.now(),
           });
           outputMap.set(nodeId, response.output);
+
+          logger?.({
+            level: 'success',
+            nodeId,
+            nodeType,
+            nodeLabel,
+            message: `${nodeLabel} completed — output type: ${response.output.type}`,
+            durationMs,
+            details: { output: response.output } as Record<string, unknown>,
+          });
         } catch (err) {
+          const errorMsg = err instanceof Error ? err.message : 'Unknown error';
           store.setNodeState(nodeId, {
             status: 'error',
-            error: err instanceof Error ? err.message : 'Unknown error',
+            error: errorMsg,
             progress: 0,
           });
+
+          logger?.({
+            level: 'error',
+            nodeId,
+            nodeType,
+            nodeLabel,
+            message: `${nodeLabel} failed: ${errorMsg}`,
+            details: { error: errorMsg } as Record<string, unknown>,
+          });
+
           // Stop pipeline on error
           break;
         }
@@ -128,22 +194,73 @@ export async function runPipeline(
     }
 
     store.setPipelineRunning(false);
+
+    const totalDuration = Date.now() - startTime;
+    logger?.({
+      level: 'info',
+      nodeId: null,
+      nodeType: null,
+      nodeLabel: null,
+      message: `Pipeline completed in ${(totalDuration / 1000).toFixed(2)}s`,
+      durationMs: totalDuration,
+    });
+
     return {
       runId,
       success: true,
       nodeResults: store.nodeStates,
-      duration: Date.now() - startTime,
+      duration: totalDuration,
     };
   } catch (err) {
     store.setPipelineRunning(false);
+
+    const errorMsg = err instanceof Error ? err.message : 'Pipeline failed';
+    logger?.({
+      level: 'error',
+      nodeId: null,
+      nodeType: null,
+      nodeLabel: null,
+      message: `Pipeline failed: ${errorMsg}`,
+    });
+
     return {
       runId,
       success: false,
       nodeResults: store.nodeStates,
       duration: Date.now() - startTime,
-      error: err instanceof Error ? err.message : 'Pipeline failed',
+      error: errorMsg,
     };
   }
+}
+
+/**
+ * Generate a hash string from PromptEnhancer config for cache comparison.
+ */
+function hashPromptEnhancerConfig(config: Record<string, unknown>): string {
+  const keys = ['creativity', 'contentType', 'tone', 'language'];
+  return keys.map((k) => `${k}:${config[k]}`).join('|');
+}
+
+/**
+ * Check if PromptEnhancer can use cached result.
+ */
+function canUsePromptEnhancerCache(
+  nodeState: { output: NodeOutput | null; status: string },
+  inputs: Record<string, unknown>,
+  config: Record<string, unknown>,
+): boolean {
+  if (nodeState.status !== 'done' || !nodeState.output) {
+    return false;
+  }
+
+  const textInput = (inputs.text as { type: string; data: { text: string } })?.data?.text || '';
+  const currentConfigHash = hashPromptEnhancerConfig(config);
+
+  // Check if the cached metadata matches current inputs
+  const cacheMeta = nodeState.output._cacheMeta;
+  if (!cacheMeta) return false;
+
+  return cacheMeta.inputText === textInput && cacheMeta.configHash === currentConfigHash;
 }
 
 /**
@@ -163,21 +280,55 @@ export async function runNode(
     throw new Error(`Node type ${nodeType} is not runnable`);
   }
 
+  // Build outputMap from current store state for single-node runs
+  const outputMap = new Map<string, NodeOutput>();
+  for (const n of nodes) {
+    const output = store.getNodeOutput(n.id);
+    if (output) outputMap.set(n.id, output);
+  }
+
+  const inputs = collectNodeInputs(nodeId, edges, outputMap);
+  const nodeConfig = (node.data as Record<string, unknown>).config as Record<string, unknown>;
+
+  // Check if PromptEnhancer can use cached result
+  if (nodeType === 'promptEnhancer') {
+    const currentState = store.getNodeState(nodeId);
+    if (canUsePromptEnhancerCache(currentState, inputs, nodeConfig)) {
+      // Skip API call, use cached output
+      store.setNodeState(nodeId, {
+        status: 'done',
+        output: currentState.output,
+        progress: 100,
+        lastRunAt: Date.now(),
+      });
+      // Mark downstream as stale
+      store.markDownstreamStale(nodeId, edges);
+      return;
+    }
+  }
+
   store.setNodeState(nodeId, { status: 'running', progress: 0, error: null });
 
   try {
-    // Build outputMap from current store state for single-node runs
-    const outputMap = new Map<string, NodeOutput>();
-    for (const n of nodes) {
-      const output = store.getNodeOutput(n.id);
-      if (output) outputMap.set(n.id, output);
+    const response = await executeNodeOnServer(nodeType, node.data, inputs);
+
+    // For PromptEnhancer, store cache metadata with the output
+    let output = response.output;
+    if (nodeType === 'promptEnhancer') {
+      const textInput = (inputs.text as { type: string; data: { text: string } })?.data?.text || '';
+      const configHash = hashPromptEnhancerConfig(nodeConfig);
+      output = {
+        ...output,
+        _cacheMeta: {
+          inputText: textInput,
+          configHash,
+        },
+      };
     }
 
-    const inputs = collectNodeInputs(nodeId, edges, outputMap);
-    const response = await executeNodeOnServer(nodeType, node.data, inputs);
     store.setNodeState(nodeId, {
       status: 'done',
-      output: response.output,
+      output,
       progress: 100,
       lastRunAt: Date.now(),
     });
@@ -205,14 +356,35 @@ async function executeNodeOnServer(
     promptEnhancer: 'prompt-enhancer',
     imageGenerator: 'image-generator',
     videoGenerator: 'video-generator',
+    videoRepainting: 'video-repainting',
+    videoExtension: 'video-extension',
+    imageToText: 'image-to-text',
+    translateText: 'translate-text',
+    backgroundRemover: 'background-remover',
+    faceCrop: 'face-crop',
+    objectRemover: 'object-remover',
+    backgroundReplacer: 'background-replacer',
+    styleTransfer: 'style-transfer',
+    inpainting: 'inpainting',
+    imageUpscaler: 'image-upscaler',
+    textOverlay: 'text-overlay',
+    frameBorder: 'frame-border',
+    stickerLayer: 'sticker-layer',
+    colorFilter: 'color-filter',
+    collageLayout: 'collage-layout',
   };
 
   const endpoint = endpointMap[nodeType];
   if (!endpoint) throw new Error(`No API endpoint for ${nodeType}`);
 
+  const [fpHash] = await Promise.all([getFingerprint()]);
   const response = await fetch(`${API_BASE}/${endpoint}/run`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-FP-Hash': fpHash,
+      'X-Session-Start': String(getSessionStartMs()),
+    },
     body: JSON.stringify({ config: nodeData.config, inputs }),
   });
 

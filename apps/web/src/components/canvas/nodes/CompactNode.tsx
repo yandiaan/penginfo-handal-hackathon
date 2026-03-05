@@ -1,10 +1,12 @@
 import { Handle, Position, useNodeId } from '@xyflow/react';
-import type { ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
+import { Check, CircleDot, RotateCw, X } from 'lucide-react';
+import { renderNodeTypeIcon } from '../icons/nodeTypeIcon';
 import { getCategoryForNodeType } from '../config/nodeCategories';
 import { PORT_COLORS } from '../config/port-colors';
 import { NODE_PORT_SCHEMAS } from '../types/node-types';
 import type { CustomNodeType } from '../types/node-types';
-import type { PortDefinition } from '../types/port-types';
+import type { NodePortSchema, PortDefinition } from '../types/port-types';
 import { useExecutionContext } from '../execution/ExecutionContext';
 import type { NodeExecutionStatus } from '../execution/types';
 
@@ -15,25 +17,27 @@ export interface CompactNodeProps {
   subtitle?: string;
   children?: ReactNode;
   selected?: boolean;
+  minWidth?: number;
+  width?: number;
+  maxWidth?: number;
+  portSchema?: NodePortSchema;
 }
 
-const STATUS_COLORS: Record<NodeExecutionStatus, { border: string; glow: string; bg: string }> = {
-  idle: { border: 'transparent', glow: 'transparent', bg: 'transparent' },
-  ready: { border: '#4ade80', glow: '#4ade8040', bg: '#4ade8015' },
-  running: { border: '#60a5fa', glow: '#60a5fa50', bg: '#60a5fa15' },
-  done: { border: '#4ade80', glow: '#4ade8040', bg: '#4ade8015' },
-  error: { border: '#f87171', glow: '#f8717150', bg: '#f8717115' },
-  stale: { border: '#fb923c', glow: '#fb923c40', bg: '#fb923c15' },
+const STATUS_COLORS: Record<
+  NodeExecutionStatus,
+  { border: string; glow: string; bg: string; label: string }
+> = {
+  idle: { border: 'transparent', glow: 'transparent', bg: 'transparent', label: '' },
+  ready: { border: '#4ade80', glow: '#4ade8040', bg: '#4ade8010', label: 'Ready' },
+  running: { border: '#60a5fa', glow: '#60a5fa50', bg: '#60a5fa10', label: 'Running...' },
+  done: { border: '#4ade80', glow: '#4ade8040', bg: '#4ade8010', label: 'Done' },
+  error: { border: '#f87171', glow: '#f8717150', bg: '#f8717110', label: 'Failed' },
+  stale: { border: '#fb923c', glow: '#fb923c40', bg: '#fb923c10', label: 'Stale' },
 };
 
-const STATUS_ICONS: Record<NodeExecutionStatus, string | null> = {
-  idle: null,
-  ready: '◉',
-  running: null, // uses animated spinner
-  done: '✓',
-  error: '✕',
-  stale: '↻',
-};
+function renderFallbackIcon(fallbackIcon?: string): ReactNode {
+  return <span className="text-[14px] leading-none">{fallbackIcon}</span>;
+}
 
 export function CompactNode({
   nodeType,
@@ -42,9 +46,13 @@ export function CompactNode({
   subtitle,
   children,
   selected = false,
+  minWidth = 200,
+  width,
+  maxWidth,
+  portSchema,
 }: CompactNodeProps) {
   const category = getCategoryForNodeType(nodeType);
-  const schema = NODE_PORT_SCHEMAS[nodeType];
+  const schema = portSchema ?? NODE_PORT_SCHEMAS[nodeType];
   const nodeId = useNodeId();
   const { getNodeState } = useExecutionContext();
   const execState = nodeId ? getNodeState(nodeId) : null;
@@ -53,182 +61,218 @@ export function CompactNode({
   const hasStatus = status !== 'idle';
   const isRunning = status === 'running';
   const isError = status === 'error';
-  const isDone = status === 'done';
+
+  const borderColor = isRunning
+    ? colors.border
+    : selected
+      ? category.color
+      : hasStatus && status !== 'stale'
+        ? `${colors.border}80`
+        : 'rgba(255,255,255,0.08)';
+
+  const outerGlow = isRunning
+    ? `0 0 0 2px ${colors.glow}, 0 0 28px ${colors.glow}`
+    : selected
+      ? `0 0 0 1.5px ${category.color}50, 0 0 20px ${category.color}20`
+      : '0 4px 20px rgba(0,0,0,0.5)';
 
   return (
     <div
-      className={`min-w-[180px] max-w-[220px] bg-[#1e1e2e] rounded-xl overflow-visible font-[Inter,system-ui,sans-serif] cursor-pointer transition-[border-color,box-shadow] duration-200 relative${isRunning ? ' animate-pulse' : ''}`}
+      className="relative flex flex-col rounded-xl overflow-visible font-[Inter,system-ui,sans-serif] cursor-default transition-[border-color,box-shadow] duration-200"
       style={{
-        border: `2px solid ${selected ? category.color : hasStatus ? colors.border : category.borderColor}`,
-        boxShadow: hasStatus
-          ? `0 0 0 3px ${colors.glow}, 0 4px 20px rgba(0, 0, 0, 0.3)`
-          : selected
-            ? `0 0 0 2px ${category.color}40, 0 4px 20px rgba(0, 0, 0, 0.3)`
-            : `0 4px 20px rgba(0, 0, 0, 0.3)`,
+        minWidth: width ?? minWidth,
+        width: width,
+        maxWidth: maxWidth,
+        background: '#15151e',
+        border: `1px solid ${borderColor}`,
+        boxShadow: outerGlow,
       }}
     >
-      {/* Status badge — n8n-style indicator */}
-      {hasStatus && (
-        <div
-          className="absolute -top-2 -right-2 z-10 flex items-center justify-center rounded-full text-[10px] font-bold leading-none"
+      {/* Top accent strip */}
+      <div
+        className="absolute top-0 left-3 right-3 rounded-b-sm"
+        style={{ height: 2, background: category.color, opacity: selected ? 1 : 0.5 }}
+      />
+
+      {/* Selected pulse ring */}
+      {selected && (
+        <span
+          className="pointer-events-none absolute -inset-[2px] rounded-[13px] motion-safe:animate-[glowPulse_2.2s_var(--motion-ease-inout)_infinite] motion-reduce:animate-none"
           style={{
-            width: 20,
-            height: 20,
-            backgroundColor: colors.border,
-            color: '#1e1e2e',
-            boxShadow: `0 0 6px ${colors.glow}`,
+            border: `1px solid ${category.color}30`,
+            boxShadow: `0 0 16px ${category.color}18`,
           }}
-          title={isError && execState?.error ? execState.error : status}
-        >
-          {isRunning ? (
-            <svg
-              className="animate-spin"
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="3"
-            >
-              <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
-            </svg>
-          ) : (
-            STATUS_ICONS[status]
-          )}
-        </div>
+        />
       )}
 
-      {/* Input handles (typed) */}
-      {schema.inputs.map((port: PortDefinition, index: number) => (
-        <Handle
-          key={`input-${port.id}`}
-          id={port.id}
-          type="target"
-          position={Position.Left}
-          className="!w-3 !h-3 !bg-[#1e1e2e]"
-          style={{
-            border: `2px solid ${PORT_COLORS[port.type]}`,
-            top: `${getHandlePosition(index, schema.inputs.length)}%`,
-          }}
-          title={`${port.label} (${port.type})${port.required ? '' : ' — optional'}`}
-        />
-      ))}
+      {/* Input port handles + external labels */}
+      {schema.inputs.map((port: PortDefinition, index: number) => {
+        const topPct = getHandlePosition(index, schema.inputs.length);
+        return (
+          <Fragment key={`input-${port.id}`}>
+            <Handle
+              id={port.id}
+              type="target"
+              position={Position.Left}
+              className="w-3! h-3! rounded-full!"
+              style={{
+                background: '#15151e',
+                border: `2px solid ${PORT_COLORS[port.type]}`,
+                boxShadow: `0 0 6px ${PORT_COLORS[port.type]}55`,
+                top: `${topPct}%`,
+              }}
+              title={`${port.label} (${port.type})${port.required ? '' : ' -- optional'}`}
+            />
+            <div
+              className="absolute pointer-events-none select-none flex items-center gap-1"
+              style={{
+                top: `${topPct}%`,
+                right: 'calc(100% + 10px)',
+                transform: 'translateY(-50%)',
+              }}
+            >
+              <span
+                className="text-[9px] leading-none font-medium whitespace-nowrap"
+                style={{ color: PORT_COLORS[port.type] + 'b0' }}
+              >
+                {port.label}
+              </span>
+              {!port.required && (
+                <span className="text-[8px] leading-none text-white/20 italic">opt</span>
+              )}
+            </div>
+          </Fragment>
+        );
+      })}
 
       {/* Header */}
-      <div
-        className="flex items-center gap-2.5 px-4 py-3.5"
-        style={{ backgroundColor: category.bgColor }}
-      >
-        <span className="text-xl">{icon}</span>
+      <div className="flex items-center gap-2 px-3 pt-4 pb-2.5">
+        <span
+          className="grid place-items-center w-6 h-6 rounded-lg shrink-0"
+          style={{ color: category.color }}
+        >
+          {renderNodeTypeIcon(nodeType, { size: 14, className: 'text-current' }) ??
+            renderFallbackIcon(icon)}
+        </span>
         <div className="flex-1 min-w-0">
-          <div
-            className="text-sm font-semibold tracking-[0.2px] whitespace-nowrap overflow-hidden text-ellipsis"
-            style={{ color: category.color }}
-          >
+          <div className="text-[12px] font-semibold text-white/80 truncate leading-tight">
             {title}
           </div>
           {subtitle && (
-            <div className="text-white/40 text-[11px] mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
+            <div className="text-[10px] text-white/35 truncate leading-tight mt-0.5">
               {subtitle}
             </div>
           )}
         </div>
+        {hasStatus && (
+          <div
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[9px] font-semibold shrink-0"
+            style={{
+              backgroundColor: `${colors.border}18`,
+              color: colors.border,
+              border: `1px solid ${colors.border}35`,
+            }}
+          >
+            {isRunning ? (
+              <svg
+                className="animate-spin shrink-0"
+                width="9"
+                height="9"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+              >
+                <path d="M12 2a10 10 0 0 1 10 10" strokeLinecap="round" />
+              </svg>
+            ) : status === 'done' ? (
+              <Check size={9} />
+            ) : isError ? (
+              <X size={9} />
+            ) : status === 'stale' ? (
+              <RotateCw size={9} />
+            ) : (
+              <CircleDot size={9} />
+            )}
+            {colors.label}
+          </div>
+        )}
       </div>
 
-      {/* Optional compact content preview */}
+      {/* Content area */}
       {children && (
-        <div
-          className="px-4 pt-2.5 pb-3.5"
-          style={{ borderTop: `1px solid ${category.borderColor}` }}
-        >
-          {children}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="px-3 pt-2.5 pb-3">{children}</div>
         </div>
       )}
 
-      {/* Status footer — shows running/done/error state */}
-      {hasStatus && (
+      {/* Running progress bar */}
+      {isRunning && execState && execState.progress > 0 && (
+        <div className="absolute bottom-0 left-0 right-0 h-0.5 rounded-b-xl overflow-hidden">
+          <div
+            className="h-full transition-all duration-300"
+            style={{ width: `${execState.progress}%`, backgroundColor: colors.border }}
+          />
+        </div>
+      )}
+
+      {/* Error footer */}
+      {isError && execState?.error && (
         <div
-          className="px-4 py-2 flex items-center gap-2 text-[10px]"
+          className="px-3 py-1.5 text-[10px] truncate flex items-center gap-1.5"
           style={{
-            borderTop: `1px solid ${category.borderColor}`,
-            backgroundColor: colors.bg,
+            borderTop: '1px solid rgba(248,113,113,0.15)',
+            color: '#f87171',
+            background: '#f8717108',
           }}
         >
-          {isRunning && (
-            <>
-              <div className="relative flex h-2 w-2">
-                <span
-                  className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                  style={{ backgroundColor: colors.border }}
-                />
-                <span
-                  className="relative inline-flex rounded-full h-2 w-2"
-                  style={{ backgroundColor: colors.border }}
-                />
-              </div>
-              <span style={{ color: colors.border }}>Running…</span>
-              {execState && execState.progress > 0 && execState.progress < 100 && (
-                <span className="text-white/40 ml-auto">{execState.progress}%</span>
-              )}
-            </>
-          )}
-          {isDone && (
-            <>
-              <span style={{ color: colors.border }}>✓ Done</span>
-              {execState?.lastRunAt && (
-                <span className="text-white/30 ml-auto">
-                  {formatTimestamp(execState.lastRunAt)}
-                </span>
-              )}
-            </>
-          )}
-          {isError && (
-            <span
-              className="truncate"
-              style={{ color: colors.border }}
-              title={execState?.error || 'Unknown error'}
+          <X size={10} className="shrink-0" />
+          {execState.error}
+        </div>
+      )}
+
+      {/* Output port handles + external labels */}
+      {schema.outputs.map((port: PortDefinition, index: number) => {
+        const topPct = getHandlePosition(index, schema.outputs.length);
+        return (
+          <Fragment key={`output-${port.id}`}>
+            <Handle
+              id={port.id}
+              type="source"
+              position={Position.Right}
+              className="w-3! h-3! rounded-full!"
+              style={{
+                background: '#15151e',
+                border: `2px solid ${PORT_COLORS[port.type]}`,
+                boxShadow: `0 0 6px ${PORT_COLORS[port.type]}55`,
+                top: `${topPct}%`,
+              }}
+              title={`${port.label} (${port.type})`}
+            />
+            <div
+              className="absolute pointer-events-none select-none flex items-center gap-1"
+              style={{
+                top: `${topPct}%`,
+                left: 'calc(100% + 10px)',
+                transform: 'translateY(-50%)',
+              }}
             >
-              ✕ {execState?.error || 'Failed'}
-            </span>
-          )}
-          {status === 'stale' && (
-            <span style={{ color: colors.border }}>↻ Needs re-run</span>
-          )}
-          {status === 'ready' && (
-            <span style={{ color: colors.border }}>◉ Ready</span>
-          )}
-        </div>
-      )}
-
-      {/* Output handles (typed) */}
-      {schema.outputs.map((port: PortDefinition, index: number) => (
-        <Handle
-          key={`output-${port.id}`}
-          id={port.id}
-          type="source"
-          position={Position.Right}
-          className="!w-3 !h-3 !bg-[#1e1e2e]"
-          style={{
-            border: `2px solid ${PORT_COLORS[port.type]}`,
-            top: `${getHandlePosition(index, schema.outputs.length)}%`,
-          }}
-          title={`${port.label} (${port.type})`}
-        />
-      ))}
+              <span
+                className="text-[9px] leading-none font-medium whitespace-nowrap"
+                style={{ color: PORT_COLORS[port.type] + 'b0' }}
+              >
+                {port.label}
+              </span>
+            </div>
+          </Fragment>
+        );
+      })}
     </div>
   );
 }
 
-// Distribute handles evenly along the node height
 function getHandlePosition(index: number, total: number): number {
   if (total === 1) return 50;
-  const padding = 25; // 25% from top/bottom
+  const padding = 22;
   return padding + (index / (total - 1)) * (100 - 2 * padding);
-}
-
-function formatTimestamp(ts: number): string {
-  const diff = Math.round((Date.now() - ts) / 1000);
-  if (diff < 60) return `${diff}s ago`;
-  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
-  return `${Math.floor(diff / 3600)}h ago`;
 }

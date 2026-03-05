@@ -1,5 +1,7 @@
 import { Handle, Position, useReactFlow } from '@xyflow/react';
 import type { ReactNode } from 'react';
+import { ChevronDown } from 'lucide-react';
+import { renderNodeTypeIcon } from '../icons/nodeTypeIcon';
 import { getCategoryForNodeType, type NodeCategoryConfig } from '../config/nodeCategories';
 import type { BaseNodeData, CustomNodeType } from '../types/node-types';
 
@@ -12,6 +14,10 @@ export interface BaseNodeProps<T extends BaseNodeData> {
   children: ReactNode;
   inputs?: number;
   outputs?: number;
+}
+
+function renderFallbackIcon(fallbackIcon?: string): ReactNode {
+  return <span className="text-[18px] leading-none">{fallbackIcon}</span>;
 }
 
 export function BaseNode<T extends BaseNodeData>({
@@ -33,10 +39,11 @@ export function BaseNode<T extends BaseNodeData>({
 
   return (
     <div
-      className="min-w-[280px] max-w-[320px] bg-[#1e1e2e] rounded-xl overflow-hidden font-[Inter,system-ui,sans-serif]"
+      className="min-w-[280px] max-w-[320px] rounded-xl overflow-hidden font-[Inter,system-ui,sans-serif] motion-lift motion-press"
       style={{
+        background: 'var(--color-surface-node)',
         border: `2px solid ${category.borderColor}`,
-        boxShadow: `0 4px 20px rgba(0, 0, 0, 0.3), 0 0 20px ${category.bgColor}`,
+        boxShadow: `0 10px 30px rgba(0, 0, 0, 0.35), 0 0 18px ${category.bgColor}`,
       }}
     >
       {/* Input handles */}
@@ -44,7 +51,7 @@ export function BaseNode<T extends BaseNodeData>({
         <Handle
           type="target"
           position={Position.Left}
-          className="!w-3 !h-3 !bg-[#1e1e2e]"
+          className="!w-3 !h-3 !bg-[var(--color-surface-node)]"
           style={{ border: `2px solid ${category.color}` }}
         />
       )}
@@ -59,7 +66,9 @@ export function BaseNode<T extends BaseNodeData>({
         onClick={toggleExpanded}
       >
         <div className="flex items-center gap-2">
-          <span className="text-lg">{icon}</span>
+          <span className="grid place-items-center w-8 h-8 rounded-lg bg-white/5 border border-white/10">
+            {renderNodeTypeIcon(nodeType) ?? renderFallbackIcon(icon)}
+          </span>
           <span
             className="text-sm font-semibold tracking-[0.3px]"
             style={{ color: category.color }}
@@ -67,12 +76,11 @@ export function BaseNode<T extends BaseNodeData>({
             {title}
           </span>
         </div>
-        <span
-          className="text-white/50 text-xs transition-transform duration-200"
+        <ChevronDown
+          size={18}
+          className="text-white/50 transition-transform duration-200"
           style={{ transform: data.isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}
-        >
-          ▼
-        </span>
+        />
       </div>
 
       {/* Content */}
@@ -87,7 +95,7 @@ export function BaseNode<T extends BaseNodeData>({
         <Handle
           type="source"
           position={Position.Right}
-          className="!w-3 !h-3 !bg-[#1e1e2e]"
+          className="!w-3 !h-3 !bg-[var(--color-surface-node)]"
           style={{ border: `2px solid ${category.color}` }}
         />
       )}

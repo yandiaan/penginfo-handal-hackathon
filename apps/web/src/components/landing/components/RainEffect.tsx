@@ -8,12 +8,11 @@ export const RainEffect = () => {
     const container = containerRef.current;
     if (!container) return;
 
-    const dropCount = 100; 
+    const dropCount = 100;
 
     for (let i = 0; i < dropCount; i++) {
       const drop = document.createElement('div');
-      
-      
+
       Object.assign(drop.style, {
         position: 'absolute',
         width: '3px',
@@ -26,16 +25,17 @@ export const RainEffect = () => {
 
       container.appendChild(drop);
 
-      
       gsap.to(drop, {
         y: window.innerHeight,
         duration: Math.random() * 0.5 + 0.5,
         repeat: -1,
-        ease: "none",
-        delay: Math.random() * 2
+        ease: 'none',
+        delay: Math.random() * 2,
       });
     }
   }, []);
 
-  return <div ref={containerRef} className="absolute inset-0 pointer-events-none overflow-hidden z-0" />;
+  return (
+    <div ref={containerRef} className="absolute inset-0 pointer-events-none overflow-hidden z-0" />
+  );
 };
