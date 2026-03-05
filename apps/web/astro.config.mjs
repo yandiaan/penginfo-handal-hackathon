@@ -13,10 +13,28 @@ export default defineConfig({
   },
   vite: {
     server: {
-      allowedHosts: ['adisai.xyz', 'www.adisai.xyz', '8.219.190.235', 'localhost'],
+      allowedHosts: [
+        'adisai.xyz',
+        'www.adisai.xyz',
+        'adisai.cobadomain.com',
+        'www.adisai.cobadomain.com',
+        'http://adisai.cobadomain.com',
+        'https://adisai.cobadomain.com',
+        '8.219.190.235',
+        'localhost',
+      ],
     },
     preview: {
-      allowedHosts: ['adisai.xyz', 'www.adisai.xyz', '8.219.190.235', 'localhost'],
+      allowedHosts: [
+        'adisai.xyz',
+        'www.adisai.xyz',
+        'adisai.cobadomain.com',
+        'www.adisai.cobadomain.com',
+        'http://adisai.cobadomain.com',
+        'https://adisai.cobadomain.com',
+        '8.219.190.235',
+        'localhost',
+      ],
     },
     plugins: [tailwindcss()],
     resolve: {
