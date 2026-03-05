@@ -12,8 +12,6 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
-    env_file:
-      - .env
     volumes:
       - server-data:/app/apps/server/data
       - server-uploads:/app/apps/server/uploads
