@@ -22,14 +22,14 @@ import type { SectionProps } from './sectionsConfig';
 // Node type metadata (mirrors nodeCategories + nodeTypeIcon)
 const NODE_META: Record<string, { label: string; Icon: React.ComponentType<{ size?: number; className?: string }>; color: string }> = {
   templatePreset: { label: 'Preset', Icon: LayoutTemplate, color: '#4ade80' },
-  textPrompt:     { label: 'Prompt', Icon: Type,           color: '#4ade80' },
-  imageUpload:    { label: 'Image',  Icon: ImageUp,         color: '#4ade80' },
-  promptEnhancer: { label: 'Enhance',Icon: Sparkles,        color: '#a78bfa' },
-  styleConfig:    { label: 'Style',  Icon: SlidersHorizontal, color: '#a78bfa' },
-  imageGenerator: { label: 'Gen',    Icon: Image,           color: '#60a5fa' },
-  textOverlay:    { label: 'Overlay',Icon: TextCursorInput, color: '#f59e0b' },
-  preview:        { label: 'Preview',Icon: Eye,             color: '#f87171' },
-  export:         { label: 'Export', Icon: Download,        color: '#f87171' },
+  textPrompt: { label: 'Prompt', Icon: Type, color: '#4ade80' },
+  imageUpload: { label: 'Image', Icon: ImageUp, color: '#4ade80' },
+  promptEnhancer: { label: 'Enhance', Icon: Sparkles, color: '#a78bfa' },
+  styleConfig: { label: 'Style', Icon: SlidersHorizontal, color: '#a78bfa' },
+  imageGenerator: { label: 'Gen', Icon: Image, color: '#60a5fa' },
+  textOverlay: { label: 'Overlay', Icon: TextCursorInput, color: '#f59e0b' },
+  preview: { label: 'Preview', Icon: Eye, color: '#f87171' },
+  export: { label: 'Export', Icon: Download, color: '#f87171' },
 };
 
 const templates = [
@@ -226,45 +226,47 @@ export function TemplatesSection({ onGetStarted }: SectionProps) {
         style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.05) 0%, transparent 70%)', filter: 'blur(40px)' }}
       />
 
-      <div ref={ref} className="relative z-10 flex flex-col h-full px-4 sm:px-10 md:px-14 py-4 sm:py-6 md:py-8 overflow-y-auto">
-        {/* Header */}
-        <div ref={headerRef} className="text-center mb-4 sm:mb-6 md:mb-8 shrink-0">
-          <p className="text-white/30 text-xs font-bold tracking-[0.25em] uppercase mb-2">Quick Start</p>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-tight tracking-tight uppercase">
-            Templates
-          </h2>
-          <p className="text-slate-400 text-sm mt-2 sm:mt-3 max-w-sm mx-auto leading-relaxed">
-            Pre-built AI pipelines. Each template is a complete node graph ready to run.
-          </p>
-        </div>
-
-        <div className="flex-1 flex flex-col min-h-0 gap-3 sm:gap-4 md:justify-center">
-          {/* 2x2 template grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-            {templates.map((t, i) => (
-              <TemplateCard key={t.id} t={t} index={i} inView={inView} onGetStarted={onGetStarted} />
-            ))}
+      <div ref={ref} className="relative z-10 flex flex-col h-full px-4 sm:px-10 md:px-14 py-2 sm:py-4 overflow-y-auto">
+        <div className="my-auto flex flex-col w-full max-w-5xl mx-auto shrink-0 py-4">
+          {/* Header */}
+          <div ref={headerRef} className="text-center mb-5 md:mb-6 lg:mb-8 shrink-0">
+            <p className="text-white/30 text-[10px] sm:text-xs font-bold tracking-[0.25em] uppercase mb-1.5 sm:mb-2 text-balance">Quick Start</p>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight tracking-tight uppercase">
+              Templates
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm mt-1.5 sm:mt-2 max-w-sm mx-auto leading-relaxed text-balance">
+              Pre-built AI pipelines. Each template is a complete node graph ready to run.
+            </p>
           </div>
 
-          {/* Blank canvas card — full width */}
-          <button
-            ref={btnRef}
-            onClick={onGetStarted}
-            className="cursor-pointer w-full rounded-xl border-2 border-dashed border-white/10 hover:border-primary/40 bg-white/2 hover:bg-primary/5 transition-all p-4 flex items-center gap-4 group"
-          >
-            <div className="size-9 rounded-lg border-2 border-dashed border-white/15 group-hover:border-primary/40 flex items-center justify-center transition-colors shrink-0">
-              <Plus size={16} className="text-white/30 group-hover:text-primary transition-colors" />
+          <div className="w-full flex flex-col min-h-0 gap-3 sm:gap-4 pt-2 md:pt-0">
+            {/* 2x2 template grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              {templates.map((t, i) => (
+                <TemplateCard key={t.id} t={t} index={i} inView={inView} onGetStarted={onGetStarted} />
+              ))}
             </div>
-            <div className="text-left flex-1">
-              <p className="text-white/50 group-hover:text-white font-bold text-sm transition-colors">
-                Start from Scratch
-              </p>
-              <p className="text-white/30 text-xs mt-0.5">
-                Empty canvas — drag in nodes and build your own pipeline
-              </p>
-            </div>
-            <ArrowRight size={14} className="text-white/20 group-hover:text-primary transition-colors shrink-0" />
-          </button>
+
+            {/* Blank canvas card — full width */}
+            <button
+              ref={btnRef}
+              onClick={onGetStarted}
+              className="cursor-pointer w-full rounded-xl border-2 border-dashed border-white/10 hover:border-primary/40 bg-white/2 hover:bg-primary/5 transition-all p-4 flex items-center gap-4 group mt-2 sm:mt-0"
+            >
+              <div className="size-9 rounded-lg border-2 border-dashed border-white/15 group-hover:border-primary/40 flex items-center justify-center transition-colors shrink-0">
+                <Plus size={16} className="text-white/30 group-hover:text-primary transition-colors" />
+              </div>
+              <div className="text-left flex-1">
+                <p className="text-white/50 group-hover:text-white font-bold text-sm transition-colors">
+                  Start from Scratch
+                </p>
+                <p className="text-white/30 text-xs mt-0.5">
+                  Empty canvas — drag in nodes and build your own pipeline
+                </p>
+              </div>
+              <ArrowRight size={14} className="text-white/20 group-hover:text-primary transition-colors shrink-0" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

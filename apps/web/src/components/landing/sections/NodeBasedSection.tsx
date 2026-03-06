@@ -288,86 +288,88 @@ export function NodeBasedSection({ onGetStarted }: SectionProps) {
         style={{ background: 'radial-gradient(circle, rgba(96,165,250,0.05) 0%, transparent 70%)', filter: 'blur(40px)' }}
       />
 
-      <div ref={ref} className="relative z-10 flex flex-col h-full px-4 sm:px-10 md:px-14 py-4 sm:py-6 md:py-8 overflow-y-auto">
-        {/* Header */}
-        <div ref={headerRef} className="text-center mb-4 sm:mb-6 md:mb-8 shrink-0">
-          <p className="text-white/30 text-xs font-bold tracking-[0.25em] uppercase mb-2">
-            Visual Programming
-          </p>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-tight tracking-tight uppercase">
-            Node Based System
-          </h2>
-          <p className="text-slate-400 text-sm mt-2 sm:mt-3 max-w-sm mx-auto leading-relaxed">
-            Connect intelligent building blocks to create powerful AI pipelines.
-          </p>
-        </div>
+      <div ref={ref} className="relative z-10 flex flex-col h-full px-4 sm:px-10 md:px-14 py-2 sm:py-4 overflow-y-auto">
+        <div className="my-auto flex flex-col w-full max-w-7xl mx-auto shrink-0 py-4">
+          {/* Header */}
+          <div ref={headerRef} className="text-center mb-5 md:mb-6 lg:mb-8 shrink-0">
+            <p className="text-white/30 text-[10px] sm:text-xs font-bold tracking-[0.25em] uppercase mb-1.5 sm:mb-2 text-balance">
+              Visual Programming
+            </p>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight tracking-tight uppercase">
+              Node Based System
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm mt-1.5 sm:mt-2 max-w-sm mx-auto leading-relaxed text-balance">
+              Connect intelligent building blocks to create powerful AI pipelines.
+            </p>
+          </div>
 
-        {/* Pipeline preview */}
-        <div className="flex-1 flex flex-col items-center min-h-0 gap-4 sm:gap-5 md:gap-6 md:justify-center">
-          {/* Node row with wires — horizontally scrollable on very small screens */}
-          <div className="w-full overflow-x-auto py-4 shrink-0">
-            <div className="flex items-center justify-center gap-0 min-w-max mx-auto px-4">
-              {previewNodes.map((node, i) => (
-                <div key={node.type} className="flex items-center">
-                  <div className="w-44 sm:w-52 md:w-60">
-                    <StaticNode node={node} index={i} inView={inView} />
+          {/* Pipeline preview */}
+          <div className="w-full flex flex-col items-center min-h-0 gap-4 sm:gap-5 lg:gap-6 pt-2 md:pt-0">
+            {/* Node row with wires — horizontally scrollable on very small screens */}
+            <div className="w-full overflow-x-auto py-4 shrink-0">
+              <div className="flex items-center justify-center gap-0 min-w-max mx-auto px-4">
+                {previewNodes.map((node, i) => (
+                  <div key={node.type} className="flex items-center">
+                    <div className="w-44 sm:w-52 md:w-60">
+                      <StaticNode node={node} index={i} inView={inView} />
+                    </div>
+                    {i < previewNodes.length - 1 && (
+                      <WireConnector
+                        fromColor={previewNodes[i].color}
+                        toColor={previewNodes[i + 1].color}
+                        delay={0.3 + i * 0.15}
+                        inView={inView}
+                      />
+                    )}
                   </div>
-                  {i < previewNodes.length - 1 && (
-                    <WireConnector
-                      fromColor={previewNodes[i].color}
-                      toColor={previewNodes[i + 1].color}
-                      delay={0.3 + i * 0.15}
-                      inView={inView}
-                    />
-                  )}
+                ))}
+              </div>
+            </div>
+
+            {/* Category legend */}
+            <div
+              ref={legendRef}
+              className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap"
+            >
+              {[
+                { label: 'Input', color: '#4ade80' },
+                { label: 'Transform', color: '#a78bfa' },
+                { label: 'Generate', color: '#60a5fa' },
+                { label: 'Compose', color: '#f59e0b' },
+                { label: 'Output', color: '#f87171' },
+              ].map((cat) => (
+                <div key={cat.label} className="flex items-center gap-1.5">
+                  <div className="size-2 rounded-full" style={{ background: cat.color }} />
+                  <span className="text-xs font-medium text-white/40">{cat.label}</span>
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* Category legend */}
-          <div
-            ref={legendRef}
-            className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap"
-          >
-            {[
-              { label: 'Input', color: '#4ade80' },
-              { label: 'Transform', color: '#a78bfa' },
-              { label: 'Generate', color: '#60a5fa' },
-              { label: 'Compose', color: '#f59e0b' },
-              { label: 'Output', color: '#f87171' },
-            ].map((cat) => (
-              <div key={cat.label} className="flex items-center gap-1.5">
-                <div className="size-2 rounded-full" style={{ background: cat.color }} />
-                <span className="text-xs font-medium text-white/40">{cat.label}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Feature pills */}
-          <div
-            ref={pillsRef}
-            className="flex items-center justify-center gap-2 flex-wrap"
-          >
-            {['Drag & Drop', 'Auto-connect', 'Type Safety', '10+ Node Types'].map((tag) => (
-              <span
-                key={tag}
-                className="text-white/40 text-xs font-medium bg-white/5 rounded-full px-3 py-1 border border-white/8"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          {/* CTA */}
-          <div ref={ctaRef}>
-            <button
-              onClick={onGetStarted}
-              className="cursor-pointer bg-primary text-white font-bold text-sm px-6 py-2.5 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
+            {/* Feature pills */}
+            <div
+              ref={pillsRef}
+              className="flex items-center justify-center gap-2 flex-wrap"
             >
-              Try the Editor
-              <ArrowRight size={14} />
-            </button>
+              {['Drag & Drop', 'Auto-connect', 'Type Safety', '10+ Node Types'].map((tag) => (
+                <span
+                  key={tag}
+                  className="text-white/40 text-xs font-medium bg-white/5 rounded-full px-3 py-1 border border-white/8"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            {/* CTA */}
+            <div ref={ctaRef} className="mt-2 sm:mt-4">
+              <button
+                onClick={onGetStarted}
+                className="cursor-pointer bg-primary text-white font-bold text-xs sm:text-sm px-5 sm:px-6 py-2 sm:py-2.5 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
+              >
+                Try the Editor
+                <ArrowRight size={14} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
