@@ -34,34 +34,17 @@ ENV NODE_ENV=production
 RUN pnpm build
 
 # Stage 3: Runner
-FROM node:20-alpine AS runner
-WORKDIR /app/apps/web
+FROM nginx:alpine AS runner
 
-# Install curl for healthcheck
-RUN apk add --no-cache curl
+# Copy built static files to nginx html directory
+COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
 
-ENV NODE_ENV=production
-ENV HOST=0.0.0.0
-ENV PORT=4321
-ENV ASTRO_TELEMETRY_DISABLED=1
-
-# Copy built files and dependencies (preserve pnpm symlink layout)
-COPY --from=builder /app/node_modules /app/node_modules
-COPY --from=builder /app/apps/web/node_modules ./node_modules
-COPY --from=builder /app/apps/web/dist ./dist
-COPY --from=builder /app/apps/web/package.json ./
-COPY --from=builder /app/apps/web/astro.config.mjs ./
-COPY --from=builder /app/apps/web/public ./public
-COPY --from=builder /app/apps/web/src/pages ./src/pages
-
-# Create non-root user
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 astrouser
-USER astrouser
+# Copy custom nginx config
+COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 4321
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD curl -f http://localhost:4321/ || exit 1
+  CMD wget -qO- http://localhost:4321/ || exit 1
 
-CMD ["node", "node_modules/astro/astro.js", "preview", "--host", "0.0.0.0", "--port", "4321", "--allowed-hosts", "adisai.xyz,www.adisai.xyz,adisai.cobadomain.com,www.adisai.cobadomain.com,8.219.190.235,localhost"]
+CMD ["nginx", "-g", "daemon off;"]
