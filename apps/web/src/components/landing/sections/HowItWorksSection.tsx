@@ -78,11 +78,10 @@ const StepNode = memo(function StepNode({
     <div ref={ref} className="flex flex-col items-center gap-3 group flex-1 min-w-0">
       {/* Icon node */}
       <div
-        className={`relative rounded-2xl flex items-center justify-center border transition-all duration-300 ${
-          step.active
-            ? 'w-16 h-16 sm:w-18 sm:h-18 border-primary/60 bg-primary/10'
-            : 'w-14 h-14 sm:w-16 sm:h-16 border-white/10 hover:border-white/25 bg-surface-panel'
-        }`}
+        className={`relative rounded-2xl flex items-center justify-center border transition-all duration-300 ${step.active
+          ? 'w-16 h-16 sm:w-18 sm:h-18 border-primary/60 bg-primary/10'
+          : 'w-14 h-14 sm:w-16 sm:h-16 border-white/10 hover:border-white/25 bg-surface-panel'
+          }`}
         style={
           step.active
             ? { boxShadow: '0 0 28px rgba(254,115,58,0.2), 0 0 0 4px rgba(254,115,58,0.08)' }
@@ -94,9 +93,8 @@ const StepNode = memo(function StepNode({
           className={step.active ? 'text-primary' : 'text-white/50'}
         />
         <div
-          className={`absolute -top-2.5 -right-2.5 text-xs font-bold px-1.5 py-0.5 rounded-full leading-none ${
-            step.active ? 'bg-primary text-white' : 'bg-white/10 text-white/40'
-          }`}
+          className={`absolute -top-2.5 -right-2.5 text-xs font-bold px-1.5 py-0.5 rounded-full leading-none ${step.active ? 'bg-primary text-white' : 'bg-white/10 text-white/40'
+            }`}
         >
           {step.n}
         </div>
@@ -107,11 +105,10 @@ const StepNode = memo(function StepNode({
 
       {/* Info card */}
       <div
-        className={`rounded-xl text-center w-full px-3 py-3 border transition-all duration-300 ${
-          step.active
-            ? 'border-primary/25 bg-primary/5'
-            : 'border-white/5 bg-surface-panel/50 group-hover:border-white/15'
-        }`}
+        className={`rounded-xl text-center w-full px-3 py-3 border transition-all duration-300 ${step.active
+          ? 'border-primary/25 bg-primary/5'
+          : 'border-white/5 bg-surface-panel/50 group-hover:border-white/15'
+          }`}
       >
         {step.active && (
           <p className="text-primary/80 font-bold uppercase text-[10px] tracking-widest mb-1">
@@ -192,61 +189,63 @@ export function HowItWorksSection({ onGetStarted }: SectionProps) {
         }}
       />
 
-      <div ref={ref} className="relative z-10 flex flex-col h-full px-4 sm:px-10 md:px-14 py-4 sm:py-6 md:py-8 overflow-y-auto">
-        {/* Header */}
-        <div ref={headerRef} className="text-center mb-4 sm:mb-6 md:mb-8 shrink-0">
-          <p className="text-white/30 text-xs font-bold tracking-[0.25em] uppercase mb-2">
-            The Logic Engine
-          </p>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white leading-tight tracking-tight uppercase">
-            How It Works
-          </h2>
-          <p className="text-slate-400 text-sm mt-2 sm:mt-3 max-w-sm mx-auto leading-relaxed">
-            Visualize your creative process through our advanced node-based workflow.
-          </p>
-        </div>
-
-        {/* Steps flow */}
-        <div className="flex-1 flex flex-col min-h-0 md:justify-center">
-          <div className="relative">
-            {/* Connecting line – only visible on lg+ where all 5 fit in a row */}
-            <div
-              className="absolute left-0 right-0 h-px z-0 hidden lg:block"
-              style={{
-                top: '32px',
-                background:
-                  'linear-gradient(to right, transparent, rgba(255,255,255,0.08) 20%, rgba(255,255,255,0.08) 80%, transparent)',
-              }}
-            />
-
-            {/* Responsive grid: 2 cols on mobile, 3 on sm/md, 5 on lg+ */}
-            <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-              {steps.map((s, i) => (
-                <StepNode key={s.n} step={s} index={i} inView={inView} />
-              ))}
-            </div>
+      <div ref={ref} className="relative z-10 flex flex-col h-full px-4 sm:px-10 md:px-14 py-2 sm:py-4 overflow-y-auto">
+        <div className="my-auto flex flex-col w-full max-w-7xl mx-auto shrink-0 py-4">
+          {/* Header */}
+          <div ref={headerRef} className="text-center mb-5 md:mb-6 lg:mb-8 shrink-0">
+            <p className="text-white/30 text-[10px] sm:text-xs font-bold tracking-[0.25em] uppercase mb-1.5 sm:mb-2 text-balance">
+              The Logic Engine
+            </p>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white leading-tight tracking-tight uppercase">
+              How It Works
+            </h2>
+            <p className="text-slate-400 text-xs sm:text-sm mt-1.5 sm:mt-2 max-w-sm mx-auto leading-relaxed text-balance">
+              Visualize your creative process through our advanced node-based workflow.
+            </p>
           </div>
 
-          {/* CTA card */}
-          <div
-            ref={ctaRef}
-            className="mt-4 sm:mt-6 md:mt-8 rounded-xl border border-white/10 bg-surface-panel px-4 sm:px-5 py-3 sm:py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4"
-          >
-            <div>
-              <h4 className="text-white font-bold text-sm sm:text-base">
-                Ready to build your first pipeline?
-              </h4>
-              <p className="text-slate-400 text-xs sm:text-sm mt-0.5">
-                Start with a template or build from scratch.
-              </p>
+          {/* Steps flow */}
+          <div className="w-full flex flex-col min-h-0 pt-2 md:pt-0">
+            <div className="relative">
+              {/* Connecting line – only visible on lg+ where all 5 fit in a row */}
+              <div
+                className="absolute left-0 right-0 h-px z-0 hidden lg:block"
+                style={{
+                  top: '32px',
+                  background:
+                    'linear-gradient(to right, transparent, rgba(255,255,255,0.08) 20%, rgba(255,255,255,0.08) 80%, transparent)',
+                }}
+              />
+
+              {/* Responsive grid: 2 cols on mobile, 3 on sm/md, 5 on lg+ */}
+              <div className="relative z-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
+                {steps.map((s, i) => (
+                  <StepNode key={s.n} step={s} index={i} inView={inView} />
+                ))}
+              </div>
             </div>
-            <button
-              onClick={onGetStarted}
-              className="cursor-pointer shrink-0 bg-primary text-white font-bold text-sm px-5 py-2.5 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
+
+            {/* CTA card */}
+            <div
+              ref={ctaRef}
+              className="mt-5 lg:mt-6 rounded-xl border border-white/10 bg-surface-panel px-4 sm:px-5 py-3 sm:py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4"
             >
-              Launch Editor
-              <ArrowRight size={14} />
-            </button>
+              <div>
+                <h4 className="text-white font-bold text-sm sm:text-base">
+                  Ready to build your first pipeline?
+                </h4>
+                <p className="text-slate-400 text-[10px] sm:text-sm mt-0.5">
+                  Start with a template or build from scratch.
+                </p>
+              </div>
+              <button
+                onClick={onGetStarted}
+                className="cursor-pointer shrink-0 bg-primary text-white font-bold text-xs sm:text-sm px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2"
+              >
+                Launch Editor
+                <ArrowRight size={14} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
