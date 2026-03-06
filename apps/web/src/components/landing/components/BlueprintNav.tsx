@@ -24,8 +24,8 @@ export function BlueprintNav({ onIndexChange }: { onIndexChange?: (index: number
     navItems.forEach((_, index) => {
       const currentIndex = (startIndex + index) % navItems.length;
       const nextIndex = (currentIndex + 1) % navItems.length;
-      const isContributors = currentIndex === 4; // Contributors is at index 4
-      const itemDuration = isContributors ? contributorsDuration : defaultDuration;
+      const isLongSection = currentIndex === 0 || currentIndex === 4; // About Us or Contributors
+      const itemDuration = isLongSection ? contributorsDuration : defaultDuration;
 
       tl.add(() => {
         setActiveIndex(currentIndex);

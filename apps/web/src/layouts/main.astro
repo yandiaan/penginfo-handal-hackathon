@@ -16,6 +16,14 @@ const { title = 'ADIS AI' } = Astro.props;
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
+    <!-- Preload landing page images so the browser fetches them in parallel
+         with scripts, before JS even runs. Heaviest assets first. -->
+    <link rel="preload" href="/about-ilustration.svg" as="image" type="image/svg+xml" />
+    <link rel="preload" href="/background-about.jpg" as="image" type="image/jpeg" />
+    <link rel="preload" href="/screenshot-1.png" as="image" type="image/png" />
+    <link rel="preload" href="/line-white.svg" as="image" type="image/svg+xml" />
+    <link rel="preload" href="/line-white-2.svg" as="image" type="image/svg+xml" />
+    <link rel="preload" href="/logo.svg" as="image" type="image/svg+xml" />
   </head>
   <body>
     <slot />

@@ -3,12 +3,14 @@ import LandingPanel from './landing/LandingPanel';
 import FlowCanvas from '@/components/canvas';
 import { TemplateSelector } from './canvas/TemplateSelector';
 import { WorkspaceSidebar } from './layout/WorkspaceSidebar';
+import SplashScreen from './SplashScreen';
 import type { PipelineTemplate } from './canvas/templates';
 import type { TourContext } from './canvas/tour/tourSteps';
 
 type AppView = 'landing' | 'template-picker' | 'canvas';
 
 export default function LandingCanvasWrapper() {
+  const [splashDone, setSplashDone] = useState(false);
   const [view, setView] = useState<AppView>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -74,6 +76,7 @@ export default function LandingCanvasWrapper() {
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-background">
+      {!splashDone && <SplashScreen onComplete={() => setSplashDone(true)} />}
       {/* Workspace Sidebar - hidden on landing */}
       {showSidebar && (
         <WorkspaceSidebar
@@ -84,7 +87,7 @@ export default function LandingCanvasWrapper() {
       )}
 
       {/* Main Content */}
-      {view === 'landing' && <LandingPanel onHideLanding={handleGetStarted} />}
+      {splashDone && view === 'landing' && <LandingPanel onHideLanding={handleGetStarted} />}
 
       {view === 'template-picker' && (
         <div className={showSidebar ? 'ml-16' : ''}>

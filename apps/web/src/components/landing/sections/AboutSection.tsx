@@ -4,6 +4,15 @@ import { RainEffect } from '../components/RainEffect';
 
 const IMG_SRC = '/about-ilustration.svg';
 
+// Module-level cache so imgLoaded persists across unmount/remount cycles
+let _imgPreloaded = false;
+if (typeof window !== 'undefined') {
+  const _img = new window.Image();
+  _img.onload = () => { _imgPreloaded = true; };
+  _img.onerror = () => { _imgPreloaded = true; };
+  _img.src = IMG_SRC;
+}
+
 const GLITCH_FRAMES = [
   'drop-shadow(6px 0 0 rgba(255,0,60,0.95)) drop-shadow(-6px 0 0 rgba(0,255,240,0.95))',
   'drop-shadow(-8px 0 0 rgba(255,0,60,0.95)) drop-shadow(8px 0 0 rgba(0,255,240,0.95))',
@@ -18,19 +27,27 @@ export function AboutSection() {
   const containerRef = useRef<HTMLDivElement>(null);
   const glitchTlRef = useRef<gsap.core.Timeline | null>(null);
   const ctxRef = useRef<gsap.Context | null>(null);
-  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgLoaded, setImgLoaded] = useState(() => {
+    if (_imgPreloaded) return true;
+    if (typeof window === 'undefined') return false;
+    const img = new window.Image();
+    img.src = IMG_SRC;
+    return img.complete;
+  });
   const [inView, setInView] = useState(false);
 
   useEffect(() => {
+    if (imgLoaded) return;
     const preload = new window.Image();
     preload.src = IMG_SRC;
     if (preload.complete) {
+      _imgPreloaded = true;
       setImgLoaded(true);
     } else {
-      preload.onload = () => setImgLoaded(true);
-      preload.onerror = () => setImgLoaded(true);
+      preload.onload = () => { _imgPreloaded = true; setImgLoaded(true); };
+      preload.onerror = () => { _imgPreloaded = true; setImgLoaded(true); };
     }
-  }, []);
+  }, [imgLoaded]);
 
   useEffect(() => {
     const el = containerRef.current;
