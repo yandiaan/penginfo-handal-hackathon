@@ -279,9 +279,9 @@ const videoGeneratorSchema = z.object({
   }),
 });
 
+// Valid DashScope t2v sizes (landscape). 720P does not exist in the API.
 const resolutionToSizeMap: Record<string, string> = {
-  '480P': '854*480',
-  '720P': '1280*720',
+  '480P': '832*480',
   '1080P': '1920*1080',
 };
 
@@ -316,7 +316,7 @@ router.post('/video-generator/run', async (req, res, next) => {
       taskId = await generateVideo({
         model: config.model,
         prompt: promptText,
-        size: resolutionToSizeMap[config.resolution] || '1280*720',
+        size: resolutionToSizeMap[config.resolution] || '1920*1080',
         duration: config.duration,
         shot_type: config.shot_type as 'single' | 'multi' | undefined,
         prompt_extend: config.prompt_extend,
@@ -328,7 +328,7 @@ router.post('/video-generator/run', async (req, res, next) => {
     const videoUrl = urls[0];
     if (!videoUrl) throw new Error('No video generated');
 
-    const [w, h] = (resolutionToSizeMap[config.resolution] || '1280*720').split('*').map(Number);
+    const [w, h] = (resolutionToSizeMap[config.resolution] || '1920*1080').split('*').map(Number);
 
     res.json({
       output: {

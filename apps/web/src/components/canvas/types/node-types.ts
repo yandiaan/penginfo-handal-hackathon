@@ -767,7 +767,7 @@ export const defaultConfigs: Record<CustomNodeType, Record<string, unknown>> = {
     mode: 'text2video',
     frameMode: 'first',
     duration: 5,
-    resolution: '720P',
+    resolution: '1080P',
     shot_type: 'single',
     prompt_extend: true,
     enableAudio: false,

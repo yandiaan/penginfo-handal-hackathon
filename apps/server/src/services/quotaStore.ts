@@ -6,10 +6,10 @@ import fs from 'fs';
 export type QuotaCategory = 'text' | 'image' | 'video' | 'pipeline';
 
 export const QUOTA_LIMITS: Record<QuotaCategory, number> = {
-  text: 30,
-  image: 5,
-  video: 2,
-  pipeline: 3,
+  text: 50,
+  image: 10,
+  video: 10,
+  pipeline: 10,
 };
 
 export const COST_PER_CALL: Record<QuotaCategory, number> = {
