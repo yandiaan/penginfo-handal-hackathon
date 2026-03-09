@@ -466,7 +466,8 @@ export async function generateVideo(params: TextToVideoParams): Promise<string> 
       ...(params.audio_url && { audio_url: params.audio_url }),
     },
     parameters: {
-      size: params.size || '1280*720',
+      // DashScope audio-driven video models do not support the size parameter
+      ...(!params.audio_url && { size: params.size || '1280*720' }),
       duration: params.duration ?? 5,
       prompt_extend: params.prompt_extend ?? true,
       watermark: params.watermark ?? false,
