@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useReactFlow, useEdges } from '@xyflow/react';
 
 import type { TextOverlayData, TextPosition, FontFamily, TextEffect } from '../../types/node-types';
@@ -51,6 +52,13 @@ export function TextOverlayPanel({ nodeId, data }: Props) {
     updateNodeData(nodeId, { config: { ...config, ...updates } });
   };
 
+  const [localText, setLocalText] = useState(config.text);
+
+  // Sync local state when the external config changes (e.g., node selection changes)
+  useEffect(() => {
+    setLocalText(config.text);
+  }, [config.text]);
+
   return (
     <>
       <div className="flex flex-col gap-2.5 p-3.5 rounded-xl border border-white/[0.06] bg-white/[0.025]">
@@ -75,8 +83,9 @@ export function TextOverlayPanel({ nodeId, data }: Props) {
           </div>
         ) : (
           <textarea
-            value={config.text}
-            onChange={(e) => updateConfig({ text: e.target.value })}
+            value={localText}
+            onChange={(e) => setLocalText(e.target.value)}
+            onBlur={() => updateConfig({ text: localText })}
             placeholder="Type text here, or connect a Text node to the input port"
             className="w-full p-3 bg-black/30 border border-white/10 rounded-xl text-white text-sm outline-none resize-y min-h-[80px] font-inherit box-border focus:border-[var(--editor-accent-65)] transition-colors"
           />

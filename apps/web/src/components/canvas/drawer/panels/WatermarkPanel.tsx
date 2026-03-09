@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useReactFlow } from '@xyflow/react';
 import type { WatermarkData, WatermarkPosition, WatermarkStyle } from '../../types/node-types';
 
@@ -27,6 +28,13 @@ export function WatermarkPanel({ nodeId, data }: Props) {
     updateNodeData(nodeId, { config: { ...config, ...updates } });
   };
 
+  const [localText, setLocalText] = useState(config.text);
+
+  // Sync local state when the external config changes (e.g., node selection changes)
+  useEffect(() => {
+    setLocalText(config.text);
+  }, [config.text]);
+
   return (
     <>
       <div className="flex flex-col gap-2.5 p-3.5 rounded-xl border border-white/[0.06] bg-white/[0.025]">
@@ -54,8 +62,9 @@ export function WatermarkPanel({ nodeId, data }: Props) {
           <label className="block text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-1">Watermark Text</label>
           <input
             type="text"
-            value={config.text}
-            onChange={(e) => updateConfig({ text: e.target.value })}
+            value={localText}
+            onChange={(e) => setLocalText(e.target.value)}
+            onBlur={() => updateConfig({ text: localText })}
             placeholder="© Your Brand"
             className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm placeholder-white/25 focus:outline-none focus:border-[var(--editor-accent-65)] transition-colors"
           />
